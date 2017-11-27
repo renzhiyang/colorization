@@ -161,16 +161,6 @@ def eval_one_image():
     test_image1 = tf.read_file('test_images2/1_2.jpg')
     l_channel, ab_channel = get_l_channel(test_image1, image_size)
     test_input = tf.concat([l_channel, ab_channel], 3)
-    # test_image2 = tf.read_file('test_images2/1_2.jpg')
-    # l_channel, ab_channel = get_l_channel(test_image2, image_size)
-    # test_image3 = tf.read_file('test_images2/1_3.jpg')
-    # l_channel, ab_channel = get_l_channel(test_image3, image_size)
-    # test_image4 = tf.read_file('test_images2/1_4.jpg')
-    # l_channel, ab_channel = get_l_channel(test_image4, image_size)
-    # test_image5 = tf.read_file('test_images2/1_5.jpg')
-    # l_channel, ab_channel = get_l_channel(test_image5, image_size)
-    # test_image6 = tf.read_file('test_images2/1_6.jpg')
-    # l_channel, ab_channel = get_l_channel(test_image6, image_size)
 
     fix = '10'
     theme = tf.read_file('test_images2/theme_' + fix + '.bmp')
@@ -198,11 +188,6 @@ def eval_one_image():
 
     l, ab = sess.run([l_channel, out_ab])
     img_out1 = get_output(l[0], ab[0])
-    # img_out2 = get_output(l[1], ab[1])
-    # img_out3 = get_output(l[2], ab[2])
-    # img_out4 = get_output(l[3], ab[3])
-    # img_out5 = get_output(l[4], ab[4])
-    # img_out6 = get_output(l[5], ab[5])
 
     print([l[0, :, :, 0].min(), l[0, :, :, 0].max()])
     print([ab[0, :, :, 0].min(), ab[0, :, :, 0].max()])
@@ -210,11 +195,6 @@ def eval_one_image():
     print()
 
     plt.imsave('out_images/1_2_testout_' + fix + '.bmp', img_out1)
-    # plt.imsave('out_images\\2_testout_' + fix + '.bmp', img_out2)
-    # plt.imsave('out_images\\3_testout_' + fix + '.bmp', img_out3)
-    # plt.imsave('out_images\\4_testout_' + fix + '.bmp', img_out4)
-    # plt.imsave('out_images\\5_testout_' + fix + '.bmp', img_out5)
-    # plt.imsave('out_images\\6_testout_' + fix + '.bmp', img_out6)
 
 
 run_training1()
