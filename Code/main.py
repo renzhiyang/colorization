@@ -24,18 +24,19 @@ def run_training1():
     train_dir = "F:\\Project_Yang\\Database\\training_image1000"
     sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
     index_dir = "F:\\Project_Yang\\Database\\index_image1000"
-    logs_dir = "log1126\\"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1127"
 
     # 获取输入
     image_list = input_data.get_image_list(train_dir, sparse_dir, index_dir)
     l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    out_ab_batch = model.built_network1126(lab_batch, sparse_ab_batch)
-
+    #224*224*2  ,   56*56*2,      112*112*2
+    out_ab_batch, layer1_batch, layer2_batch = model.built_network1127(lab_batch, sparse_ab_batch)
+    index_layer1, index_layer2 =model.bilinear_of_indexbatch(index_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    loss1, loss2, train_loss = model.losses1126(out_ab_batch, index_batch, ab_batch)
+    train_loss = model.losses1127(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
     train_op = model.training(train_loss, global_step)
 
     l_batch = tf.cast(l_batch, tf.float64)
@@ -54,7 +55,7 @@ def run_training1():
             if coord.should_stop():
                 break
 
-            _, tra_loss, los1, los2 = sess.run([train_op, train_loss, loss1, loss2])
+            _, tra_loss = sess.run([train_op, train_loss])
 
             if isnan(tra_loss):
                 print('Loss is NaN.')
@@ -64,7 +65,7 @@ def run_training1():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d, loss(out_orl): %g, loss(out_index): %g, loss: %g" % (step, los1, los2, tra_loss))
+                print("Step: %d,  loss: %g" % (step, tra_loss))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
