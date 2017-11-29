@@ -40,7 +40,8 @@ def run_training1():
     global_step = tf.train.get_or_create_global_step(sess.graph)
     #train_loss = newModel.losses1123(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
     train_loss = model.losses1123(out_ab_batch, index_batch)
-    train_op = newModel.training(train_loss, global_step)
+    train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_batch)
+    train_op = model.training(train_loss, global_step)
 
     l_batch = tf.cast(l_batch, tf.float64)
     lab_batch = tf.cast(lab_batch, tf.float64)
@@ -59,6 +60,7 @@ def run_training1():
                 break
 
             _, tra_loss = sess.run([train_op, train_loss])
+            tra_rmse, tra_psnr = sess.run([train_rmse, train_psnr])
 
             if isnan(tra_loss):
                 print('Loss is NaN.')
@@ -68,7 +70,7 @@ def run_training1():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,  loss: %g" % (step, tra_loss))
+                print("Step: %d,  loss: %g, MSE: %g, PSNR: %g" % (step, tra_loss, tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)

@@ -1,5 +1,10 @@
 import tensorflow as tf
 
+def log10(x):
+  numerator = tf.log(x)
+  denominator = tf.log(tf.constant(10, dtype=numerator.dtype))
+  return numerator / denominator
+
 #leaky relu
 def lrelu(x, leak=0.2, name="lrelu", alt_relu_impl=False):
 

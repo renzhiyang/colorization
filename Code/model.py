@@ -394,9 +394,11 @@ def losses1127(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_laye
 def get_PSNR(out_ab_batch, index_ab_batch):
     b = 8
     MAX = 2 ** b - 1
-    MSE = tf.reduce_mean(((out_ab_batch - index_ab_batch) ** 2))
-    PSNR = 20 * np.log10(MAX**2 / MES)
-    return PSNR
+    RMSE = tf.sqrt(tf.reduce_mean(tf.squared_difference(out_ab_batch, index_ab_batch)))
+    PSNR = 10 * log10( MAX / RMSE)
+    tf.summary.scalar('RMSE', RMSE)
+    tf.summary.scalar('PSNR', PSNR)
+    return RMSE, PSNR
 
 
 # 训练操作
