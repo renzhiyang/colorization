@@ -391,6 +391,13 @@ def losses1127(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_laye
         tf.summary.scalar('loss3', loss3)
         return loss
 
+def get_PSNR(out_ab_batch, index_ab_batch):
+    b = 8
+    MAX = (2 ** b - 1) ** 2
+    MSE = ((out_ab_batch - index_ab_batch) ** 2).mean(axis=None)
+    PSNR = 20 * np.log10(MAX / MES)
+    return PSNR
+
 
 # 训练操作
 def training(loss, global_step):
