@@ -95,33 +95,38 @@ def built_network1123(image_l_batch, sparse_ab_batch):
         # conv3_3 = 56*56*256
         conv3_3 = general_conv2d(conv3_2, filters * 4, kernel_size, 1, name="conv3_3")
 
-        # middle level 50*28*28*512 , 建立四个resnet的block
-        conv4 = general_conv2d(conv3_3, filters * 8, kernel_size, 2, name="conv4")
-        conv4_1 = build_ResnetBlock(conv4, filters * 8, name="conv4_1")
-        conv4_2 = build_ResnetBlock(conv4_1, filters * 8, name="conv4_2")
-        conv4_3 = build_ResnetBlock(conv4_2, filters * 8, name="conv4_3")
-        conv4_4 = build_ResnetBlock(conv4_3, filters * 8, name="conv4_4")
+        # middle level 50*28*28*512
+        conv4_1 = general_conv2d(conv3_3, filters * 8, kernel_size, 2, name="conv4_1")
+        conv4_2 = general_conv2d(conv4_1, filters * 8, kernel_size, 1, name="conv4_2")
+        conv4_3 = general_conv2d(conv4_2, filters * 8, kernel_size, 1, name="conv4_3")
+        conv4_4 = general_conv2d(conv4_3, filters * 8, kernel_size, 1, name="conv4_4")
+        conv4_5 = general_conv2d(conv4_4, filters * 8, kernel_size, 1, name="conv4_5")
+        conv4_6 = general_conv2d(conv4_5, filters * 8, kernel_size, 1, name="conv4_6")
+        conv4_7 = general_conv2d(conv4_6, filters * 8, kernel_size, 1, name="conv4_7")
+        conv4_8 = general_conv2d(conv4_7, filters * 8, kernel_size, 1, name="conv4_8")
+        conv4_9 = general_conv2d(conv4_8, filters * 8, kernel_size, 1, name="conv4_9")
+        conv4_10 = general_conv2d(conv4_9, filters * 8, kernel_size, 1, name="conv4_10")
+        conv4_11 = general_conv2d(conv4_10, filters * 8, kernel_size, 1, name="conv4_11")
+        conv4_12 = general_conv2d(conv4_11, filters * 8, kernel_size, 1, name="conv4_12")
+
 
         # conv5_1 = 56*56*256
-        coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1") + (1 - coef1) * conv3_3
+        conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1") + conv3_3
         # conv5_2 = 56*56*256
         conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
         # conv5_3 = 56*56*256
         conv5_3 = general_conv2d(conv5_2, filters * 4, kernel_size, 1, name="conv5_3")
         # conv6_1 = 112*112*128
-        coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1") + (1 - coef2) * conv2_2
+        conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1") + conv2_2
         # conv6_2 = 112*112*128
         conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
         # conv7_1 = 224*224*64
-        coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv7_1 = general_deconv2d(conv6_2, filters, kernel_size, 2, name="conv7_1") + (1 - coef3) * conv1_2
+        conv7_1 = general_deconv2d(conv6_2, filters, kernel_size, 2, name="conv7_1") + conv1_2
         # conv7_2 = 224*224*64
         conv7_2 = general_conv2d(conv7_1, filters, kernel_size, 1, name="conv7_2")
 
         # conv8_1 = 224*224*2
-        conv8_1 = general_conv2d(conv7_2, 2, kernel_size, 1, name="conv8_1")
+        conv8_1 = general_conv2d(conv7_2, 2, 1, 1, name="conv8_1")
 
         return tf.nn.tanh(conv8_1, name="output")
 
