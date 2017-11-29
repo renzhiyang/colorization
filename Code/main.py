@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 10
+BATCH_SIZE = 5
 CAPACITY = 1000     # 队列容量
 MAX_STEP = 150000
 
@@ -20,7 +20,7 @@ MAX_STEP = 150000
 
 def run_training1():
     train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    sparse_dir = "F:\\Project_Yang\\Code\\Project_Yang\\sparseimg"
+    sparse_dir = "F:\\Project_Yang\\Code\\sparseimg"
     index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
     #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
     #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
