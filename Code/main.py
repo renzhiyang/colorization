@@ -11,33 +11,35 @@ from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 3
+BATCH_SIZE = 10
 CAPACITY = 1000     # 队列容量
-MAX_STEP = 100000
+MAX_STEP = 150000
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
 
 def run_training1():
-    #train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    #sparse_dir = "F:\\Project_Yang\\Code\\Project_Yang\\sparseimg"
-    #index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
-    train_dir = "F:\\Project_Yang\\Database\\training_image1000"
-    sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
-    index_dir = "F:\\Project_Yang\\Database\\index_image1000"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1128"
+    train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
+    sparse_dir = "F:\\Project_Yang\\Code\\Project_Yang\\sparseimg"
+    index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
+    #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
+    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
+    #index_dir = "F:\\Project_Yang\\Database\\index_image1000"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1123new"
 
     # 获取输入
     image_list = input_data.get_image_list(train_dir, sparse_dir, index_dir)
     l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #224*224*2  ,   56*56*2,      112*112*2
-    out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
-    index_layer1, index_layer2 = newModel.bilinear_of_indexbatch(index_batch)
+    #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
+    out_ab_batch = model.built_network1123(l_batch, sparse_ab_batch)
+    #index_layer1, index_layer2 = newModel.bilinear_of_indexbatch(index_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = newModel.losses(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
+    #train_loss = newModel.losses1123(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
+    train_loss = model.losses1123(out_ab_batch, index_batch)
     train_op = newModel.training(train_loss, global_step)
 
     l_batch = tf.cast(l_batch, tf.float64)
