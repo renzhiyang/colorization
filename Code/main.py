@@ -20,16 +20,16 @@ MAX_STEP = 150000
 
 def run_training1():
     train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    sparse_dir = "F:\\Project_Yang\\Database\\sparseImage"
+    sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
     index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
-    mask_dir = "F:\\Project_Yang\\Database\\maskImage"
+    mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
     #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
     #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
     #index_dir = "F:\\Project_Yang\\Database\\index_image1000"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1123new"
 
     # 获取输入
-    image_list = input_data.get_image_list(train_dir, sparse_dir, maskImage, index_dir)
+    image_list = input_data.get_image_list(train_dir, sparse_dir, mask_dir, index_dir)
     l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch, mask_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #224*224*2  ,   56*56*2,      112*112*2
@@ -76,10 +76,10 @@ def run_training1():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            '''if step - 1e4 == 0:
-                l, lab, ab_out = sess.run([l_batch, lab_batch, out_ab_batch])
+            if step % 10000 == 0:
+                l, ab, ab_out = sess.run([l_batch, ab_batch, out_ab_batch])
                 l = l[0]
-                lab = lab[0]
+                ab = ab[0]
                 ab_out = ab_out[0]
 
                 print([l[:, :, 0].min(), l[:, :, 0].max()])
@@ -87,27 +87,27 @@ def run_training1():
                 print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
 
                 l = l * 100
-                lab = lab * 255 - 128
+                ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
-                img_in = np.concatenate([l, lab], 2)
+                img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
                 img_out = color.lab2rgb(img_out)
 
-                print([l[:, :, 0].min(), l[:, :, 0].max()])
-                print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
-                print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
-                print()
+                #print([l[:, :, 0].min(), l[:, :, 0].max()])
+                #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
+                #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
+                #print()
                 plt.subplot(241), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(242), plt.imshow(lab[:, :, 0], 'gray')
-                plt.subplot(243), plt.imshow(lab[:, :, 1], 'gray')
+                plt.subplot(242), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(243), plt.imshow(ab[:, :, 1], 'gray')
                 plt.subplot(244), plt.imshow(img_in)
                 plt.subplot(245), plt.imshow(l[:, :, 0], 'gray')
                 plt.subplot(246), plt.imshow(ab_out[:, :, 0], 'gray')
                 plt.subplot(247), plt.imshow(ab_out[:, :, 1], 'gray')
                 plt.subplot(248), plt.imshow(img_out)
                 plt.show()
-                '''
+
 
     except tf.errors.OutOfRangeError:
         print("Done.")

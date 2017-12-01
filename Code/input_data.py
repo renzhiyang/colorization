@@ -66,9 +66,9 @@ def get_image_list(train_dir, sparse_dir, mask_dir, index_dir):
     train_list = get_all_files(train_dir)       # 彩色图片
     #train_list.extend(train_list)
     #train_list.extend(train_list)
-    sparse_dir = get_all_files(sparse_dir)       # 颜色主题
+    sparse_list = get_all_files(sparse_dir)       # 颜色主题
     index_list = get_all_files(index_dir)       # 颜色标签
-    mask_list = get_all_files()
+    mask_list = get_all_files(mask_dir)
 
     print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
     print("训练目录%s, 文件个数%d" % (sparse_dir, len(sparse_list)))
@@ -140,7 +140,7 @@ def get_batch(file_list, batch_size, capacity):
     train_mask = tf.image.decode_bmp(train_mask, channels = 3)
     train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
     train_mask = tf.cast(train_mask, tf.float32) / 255.0
-    train_mask = train_mask[:, :, 0]
+    train_mask = train_mask[:, :, 0:1]
 
 
     # 颜色标签处理
