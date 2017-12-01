@@ -73,12 +73,12 @@ def built_network1122(image_batch, sparse_batch):
         return tf.nn.tanh(conv8_1, name="output")
 
 
-def built_network1123(image_l_batch, sparse_ab_batch):
+def built_network1123(image_l_batch, make_batch, sparse_ab_batch):
     with tf.name_scope("network") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*3 + mask
-        input_batch = tf.concat([image_l_batch, sparse_ab_batch], 3)
+        # input_batch = 224*224*4
+        input_batch = tf.concat([image_l_batch, make_batch, sparse_ab_batch], 3)
 
         # conv1_1 = 224*224*64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
