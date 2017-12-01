@@ -20,20 +20,21 @@ MAX_STEP = 150000
 
 def run_training1():
     train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    sparse_dir = "F:\\Project_Yang\\Code\\sparseimg"
+    sparse_dir = "F:\\Project_Yang\\Database\\sparseImage"
     index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
+    mask_dir = "F:\\Project_Yang\\Database\\maskImage"
     #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
     #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
     #index_dir = "F:\\Project_Yang\\Database\\index_image1000"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1123new"
 
     # 获取输入
-    image_list = input_data.get_image_list(train_dir, sparse_dir, index_dir)
-    l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
+    image_list = input_data.get_image_list(train_dir, sparse_dir, maskImage, index_dir)
+    l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch, mask_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #224*224*2  ,   56*56*2,      112*112*2
     #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
-    out_ab_batch = model.built_network1123(l_batch, sparse_ab_batch)
+    out_ab_batch = model.built_network1123(l_batch, mask_batch, sparse_ab_batch)
     #index_layer1, index_layer2 = newModel.bilinear_of_indexbatch(index_batch)
     sess = tf.Session()
 
