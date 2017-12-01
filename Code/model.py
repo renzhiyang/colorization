@@ -77,7 +77,7 @@ def built_network1123(image_l_batch, sparse_ab_batch):
     with tf.name_scope("network") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*3
+        # input_batch = 224*224*3 + mask
         input_batch = tf.concat([image_l_batch, sparse_ab_batch], 3)
 
         # conv1_1 = 224*224*64
@@ -111,17 +111,20 @@ def built_network1123(image_l_batch, sparse_ab_batch):
 
 
         # conv5_1 = 56*56*256
-        conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1") + conv3_3
+        coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1") + (1 - coef1) * conv3_3
         # conv5_2 = 56*56*256
         conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
         # conv5_3 = 56*56*256
         conv5_3 = general_conv2d(conv5_2, filters * 4, kernel_size, 1, name="conv5_3")
         # conv6_1 = 112*112*128
-        conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1") + conv2_2
+        coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1") + (1 - coef2) * conv2_2
         # conv6_2 = 112*112*128
         conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
         # conv7_1 = 224*224*64
-        conv7_1 = general_deconv2d(conv6_2, filters, kernel_size, 2, name="conv7_1") + conv1_2
+        coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv7_1 = general_deconv2d(conv6_2, filters, kernel_size, 2, name="conv7_1") + (1 - coef3) * conv1_2
         # conv7_2 = 224*224*64
         conv7_2 = general_conv2d(conv7_1, filters, kernel_size, 1, name="conv7_2")
 
