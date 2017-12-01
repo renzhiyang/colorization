@@ -62,26 +62,28 @@ def get_all_files(file_path):
 
 
 # 获取指定路径下的训练数据和真值
-def get_image_list(train_dir, theme_dir, index_dir):
+def get_image_list(train_dir, sparse_dir, mask_dir, index_dir):
     train_list = get_all_files(train_dir)       # 彩色图片
     #train_list.extend(train_list)
     #train_list.extend(train_list)
-    theme_list = get_all_files(theme_dir)       # 颜色主题
+    sparse_dir = get_all_files(sparse_dir)       # 颜色主题
     index_list = get_all_files(index_dir)       # 颜色标签
+    mask_list = get_all_files()
 
     print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
-    print("训练目录%s, 文件个数%d" % (theme_dir, len(theme_list)))
+    print("训练目录%s, 文件个数%d" % (sparse_dir, len(sparse_list)))
     print("训练目录%s, 文件个数%d" % (index_dir, len(index_list)))
 
-    temp = np.array([train_list, theme_list, index_list])
+    temp = np.array([train_list, sparse_list, mask_list, index_list])
     temp = temp.transpose()
     np.random.shuffle(temp)
 
     train_list = list(temp[:, 0])
-    theme_list = list(temp[:, 1])
-    index_list = list(temp[:, 2])
+    sparse_list = list(temp[:, 1])
+    mask_list = list(temp[:, 2])
+    index_list = list(temp[:, 3])
 
-    return [train_list, theme_list, index_list]
+    return [train_list, sparse_list, mask_list, index_list]
 
 
 # 按批次获取图片
@@ -133,8 +135,16 @@ def get_batch(file_list, batch_size, capacity):
     ab_theme = (train_theme[:, :, 1:] + 128) / 255.0  # ab范围[-128, 127]
     sparse = tf.concat([l_theme, ab_theme], 2)
 
+    #mask_batch
+    train_mask = tf.read_file(filename_queue[2])
+    train_mask = tf.image.decode_bmp(train_mask, channels = 3)
+    train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
+    train_mask = tf.cast(train_mask, tf.float32) / 255.0
+    train_mask = train_mask[:, :, 0]
+
+
     # 颜色标签处理
-    train_index = tf.read_file(filename_queue[2])
+    train_index = tf.read_file(filename_queue[3])
     train_index = tf.image.decode_jpeg(train_index, channels=3)
     train_index = tf.image.resize_images(train_index, [image_size, image_size])
     train_index = tf.cast(train_index, tf.float64) / 255.0
@@ -145,11 +155,11 @@ def get_batch(file_list, batch_size, capacity):
     ab_index = (train_index[:, :, 1:] + 128) / 255.0
 
     # 获取batch
-    l_batch, ab_bacth, lab_batch, sparse_ab_batch, index_batch=\
-        tf.train.shuffle_batch([l_color, ab_color, train_image, ab_theme, ab_index],
+    l_batch, ab_bacth, lab_batch, sparse_ab_batch, index_batch, mask_batch=\
+        tf.train.shuffle_batch([l_color, ab_color, train_image, ab_theme, ab_index, train_mask],
                                batch_size=batch_size,
                                capacity=capacity,
                                min_after_dequeue=500,
                                num_threads=64)
 
-    return l_batch, ab_bacth, lab_batch, sparse_ab_batch, index_batch
+    return l_batch, ab_bacth, lab_batch, sparse_ab_batch, index_batch, mask_batch
