@@ -140,7 +140,7 @@ def get_batch(file_list, batch_size, capacity):
     train_mask = tf.image.decode_bmp(train_mask, channels = 3)
     train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
     train_mask = tf.cast(train_mask, tf.float32) / 255.0
-    train_mask = train_mask[:, :, 0:1]
+    train_mask = train_mask[:, :, 1]
 
 
     # 颜色标签处理
