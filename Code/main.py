@@ -77,9 +77,10 @@ def run_training1():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 10000 == 0:
-                l, ab, ab_out = sess.run([l_batch, ab_batch, out_ab_batch])
+                l, ab, ab_index, ab_out = sess.run([l_batch, ab_batch, index_batch, out_ab_batch])
                 l = l[0]
                 ab = ab[0]
+                ab_index = ab_index[0]
                 ab_out = ab_out[0]
 
                 print([l[:, :, 0].min(), l[:, :, 0].max()])
@@ -89,10 +90,13 @@ def run_training1():
                 l = l * 100
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
+                ab_index = ab_index * 255 -128
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
                 img_out = color.lab2rgb(img_out)
+                img_index = np.concatenate([l, ab_index], 2)
+                img_index = color.lab2rgb(img_index)
 
                 #print([l[:, :, 0].min(), l[:, :, 0].max()])
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
@@ -102,10 +106,16 @@ def run_training1():
                 plt.subplot(242), plt.imshow(ab[:, :, 0], 'gray')
                 plt.subplot(243), plt.imshow(ab[:, :, 1], 'gray')
                 plt.subplot(244), plt.imshow(img_in)
+
                 plt.subplot(245), plt.imshow(l[:, :, 0], 'gray')
                 plt.subplot(246), plt.imshow(ab_out[:, :, 0], 'gray')
                 plt.subplot(247), plt.imshow(ab_out[:, :, 1], 'gray')
                 plt.subplot(248), plt.imshow(img_out)
+
+                plt.subplot(245), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(246), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(247), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(248), plt.imshow(img_index)
                 plt.show()
 
 
