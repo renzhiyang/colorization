@@ -179,7 +179,20 @@ def losses(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, 
         tf.summary.scalar('loss3', loss3)
         return loss
 
-def get_gradient_map(input_batch):
+def get_sobel_map(input_batch, name):
+    with tf.variable_scope(name):
+        batch_size = input_batch.get_shape()[0].value
+        horizontal_filters = tf.get_variable("horizontal_filters", shape=[3, 3, 2, 1], dtype=tf.float32,
+                                             initializer=tf.constant_initializer(0.5))
+
+        vertical_filters = tf.get_variable("vertical_filters", shape=[3, 3, 2, 1], dtype=tf.float32,
+                                             initializer=tf.constant_initializer(0.5))
+
+        diagonal_filters_1 = tf.get_variable("diagonal_filters_1", shape=[3, 3, 2, 1], dtype=tf.float32,
+                                             initializer=tf.constant_initializer(0.5))
+
+        diagonal_filters_2 = tf.get_variable("diagonal_filters_2", shape=[3, 3, 2, 1], dtype=tf.float32,
+                                             initializer=tf.constant_initializer(0.5))
 
 
 # 训练操作
