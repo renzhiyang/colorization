@@ -13,12 +13,12 @@ def build_ResnetBlock(inputres, dim, name = "resnet"):
         return tf.nn.relu(out_res + inputres)
 
 
-def built_network(image_l_batch, mask_batch, sparse_ab_batch):
+def built_network(replace_point_batch, mask_batch):
     with tf.name_scope("network") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*4
-        input_batch = tf.concat([image_l_batch, mask_batch, sparse_ab_batch], 3)
+        # input_batch = 224*224*3
+        input_batch = tf.concat([replace_point_batch, mask_batch], 3)
 
         # conv1_1 = 224*224*64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
@@ -80,13 +80,13 @@ def getResult_sobel(input_batch):
     sobel_x_filter = tf.reshape(sobel_x, [3, 3, 1, 1])
     sobel_y_filter = tf.transpose(sobel_x_filter, [1, 0, 2, 3])
 
-    filtered_x_one = tf.nn.conv2d(input_bathch[:, :, :, 0], sobel_x_filter,
+    filtered_x_one = tf.nn.conv2d(input_batch[:, :, :, 0:1], sobel_x_filter,
                                    strides=[1, 1, 1, 1], padding='SAME')
-    filtered_x_two = tf.nn.conv2d(input_bathch[:, :, :, 1], sobel_x_filter,
+    filtered_x_two = tf.nn.conv2d(input_batch[:, :, :, 1:2], sobel_x_filter,
                                   strides=[1, 1, 1, 1], padding='SAME')
-    filtered_y_one = tf.nn.conv2d(input_bathch[:, :, :, 0], sobel_y_filter,
+    filtered_y_one = tf.nn.conv2d(input_batch[:, :, :, 0:1], sobel_y_filter,
                                   strides=[1, 1, 1, 1], padding='SAME')
-    filtered_y_two = tf.nn.conv2d(input_bathch[:, :, :, 0], sobel_y_filter,
+    filtered_y_two = tf.nn.conv2d(input_batch[:, :, :, 1:2], sobel_y_filter,
                                   strides=[1, 1, 1, 1], padding='SAME')
 
     return filtered_x_one, filtered_x_two, filtered_y_one, filtered_y_two
@@ -104,10 +104,11 @@ def sobeled_losses(output_batch, index_batch, name = "sobeled_loss"):
         return loss
 
 #输出的图片中与sparse中相对应的点，与sparse做loss，也就是mask loss
-def mask_loss(output_batch, mask_batch, sparse_batch, name = "mask_loss"):
+def mask_losses(output_batch, mask_batch, sparse_batch, name = "mask_loss"):
     with tf.variable_scope(name):
-        output_batch[:, :, :, 0] = tf.multiply(output_batch[:, :, :, 0], mask_batch)
-        output_batch[:, :, :, 1] =  tf.multiply(output_batch[:, :, :, 1], mask_batch)
+        a_batch = tf.multiply(output_batch[:, :, :, 0:1], mask_batch)
+        b_batch = tf.multiply(output_batch[:, :, :, 1:2], mask_batch)
+        outpoint_batch = tf.concat([a_batch, b_batch], 3)
         mask_loss = L1_loss(output_batch, sparse_batch, name = "mask_loss")
         return mask_loss
 
@@ -117,7 +118,7 @@ def mask_loss(output_batch, mask_batch, sparse_batch, name = "mask_loss"):
 def whole_loss(output_batch, index_batch, mask_batch, sparse_batch):
     with tf.name_scope('whole_loss') as scope:
         sobeled_loss = sobeled_losses(output_batch, index_batch)
-        mask_loss = mask_loss(output_batch, mask_batch, sparse_batch)
+        mask_loss = mask_losses(output_batch, mask_batch, sparse_batch)
         loss = sobeled_loss + mask_loss
         return loss
 

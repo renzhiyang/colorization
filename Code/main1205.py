@@ -4,8 +4,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import input_data
-import model
-import model1128 as newModel
+import model1205 as model
 from math import isnan
 from matplotlib import pyplot as plt
 import skimage.color as color
@@ -19,14 +18,17 @@ MAX_STEP = 150000
 
 
 def run_training1():
-    train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
-    index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
-    mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
-    #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
-    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
-    #index_dir = "F:\\Project_Yang\\Database\\index_image1000"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1123new"
+    #train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
+    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
+    #index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
+    #mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
+
+
+    train_dir = "F:\\Project_Yang\\Database\\database_test\\train_images"
+    sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
+    index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
+    mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1205"
 
     # 获取输入
     image_list = input_data.get_image_list(train_dir, sparse_dir, mask_dir, index_dir)
@@ -34,13 +36,12 @@ def run_training1():
 
     #224*224*2  ,   56*56*2,      112*112*2
     #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
-    out_ab_batch = model.built_network1123(l_batch, mask_batch, sparse_ab_batch)
-    #index_layer1, index_layer2 = newModel.bilinear_of_indexbatch(index_batch)
+    out_ab_batch = model.built_network(ab_batch, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
     #train_loss = newModel.losses1123(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
-    train_loss = model.losses1123(out_ab_batch, index_batch)
+    train_loss = model.whole_loss(out_ab_batch, index_batch, mask_batch, sparse_ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_batch)
     train_op = model.training(train_loss, global_step)
 
