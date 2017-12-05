@@ -19,14 +19,14 @@ MAX_STEP = 150000
 
 
 def run_training1():
-    train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
-    index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
-    mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
-    #train_dir = "F:\\Project_Yang\\Database\\training_image1000"
-    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
-    #index_dir = "F:\\Project_Yang\\Database\\index_image1000"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1123new"
+    #train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
+    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
+    #index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
+    #mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
+    train_dir = "F:\\Project_Yang\\Database\\training_image1000"
+    sparse_dir = "F:\\Project_Yang\\Database\\sparse_image4_1000bmp"
+    index_dir = "F:\\Project_Yang\\Database\\index_image1000"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1205new"
 
     # 获取输入
     image_list = input_data.get_image_list(train_dir, sparse_dir, mask_dir, index_dir)
