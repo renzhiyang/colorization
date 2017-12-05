@@ -179,6 +179,8 @@ def losses(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, 
         tf.summary.scalar('loss3', loss3)
         return loss
 
+def get_gradient_map(input_batch):
+
 
 # 训练操作
 def training(loss, global_step):
