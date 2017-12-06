@@ -18,16 +18,16 @@ MAX_STEP = 150000
 
 
 def run_training1():
-    #train_dir = "F:\\Project_Yang\\Database\\new_colorimage1"
-    #sparse_dir = "F:\\Project_Yang\\Database\\sparse_Image"
-    #index_dir = "F:\\Project_Yang\\Database\\new_colorimage4"
-    #mask_dir = "F:\\Project_Yang\\Database\\mask_Image"
+    train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
+    sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
+    index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
+    mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
 
 
-    train_dir = "F:\\Project_Yang\\Database\\database_test\\train_images"
-    sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
-    index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
-    mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
+    #train_dir = "F:\\Project_Yang\\Database\\database_test\\train_images"
+    #sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
+    #index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
+    #mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1205"
 
     # 获取输入
@@ -36,7 +36,7 @@ def run_training1():
 
     #224*224*2  ,   56*56*2,      112*112*2
     #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
-    out_ab_batch = model.built_network(ab_batch, mask_batch)
+    out_ab_batch = model.built_network(ab_batch, sparse_ab_batch, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -103,20 +103,20 @@ def run_training1():
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
                 #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
                 #print()
-                plt.subplot(241), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(242), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(243), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(244), plt.imshow(img_in)
+                plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(3, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(245), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(246), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(247), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(248), plt.imshow(img_out)
+                plt.subplot(3, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(3, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(3, 4, 8), plt.imshow(img_out)
 
-                plt.subplot(245), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(246), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(247), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(248), plt.imshow(img_index)
+                plt.subplot(3, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(3, 4, 12), plt.imshow(img_index)
                 plt.show()
 
 
