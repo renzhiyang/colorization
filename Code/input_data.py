@@ -96,6 +96,7 @@ def get_batch(file_list, batch_size, capacity):
     # 彩色图片处理
     train_image = tf.read_file(filename_queue[0])
     train_image = tf.image.decode_jpeg(train_image, channels=3)
+    #train_image = tf.image.decode_bmp(train_image)
     train_image = tf.image.resize_images(train_image, [image_size, image_size])
     train_image = tf.cast(train_image, tf.float64) / 255.0     # 转LAB空间需要float64
     train_image = rgb_to_lab(train_image)
@@ -125,7 +126,7 @@ def get_batch(file_list, batch_size, capacity):
     # # ab_theme = tf.reshape(ab_theme, [1, 1, -1])
     train_theme = tf.read_file(filename_queue[1])
     #train_theme = tf.image.decode_jpeg(train_theme, channels=3)
-    train_theme = tf.image.decode_bmp(train_theme,channels = 3)
+    train_theme = tf.image.decode_bmp(train_theme, channels = 3)
     train_theme = tf.image.resize_images(train_theme, [image_size, image_size])
     train_theme = tf.cast(train_theme, tf.float64) / 255.0  # 转LAB空间需要float64
     train_theme = rgb_to_lab(train_theme)
