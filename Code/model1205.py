@@ -13,12 +13,12 @@ def build_ResnetBlock(inputres, dim, name = "resnet"):
         return tf.nn.relu(out_res + inputres)
 
 
-def built_network(replace_point_batch, mask_batch):
+def built_network(input_ab_batch, sparse_batch, mask_batch):
     with tf.name_scope("network") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*3
-        input_batch = tf.concat([replace_point_batch, mask_batch], 3)
+        # input_batch = 224*224*5
+        input_batch = tf.concat([input_ab_batch, sparse_batch, mask_batch], 3)
 
         # conv1_1 = 224*224*64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
