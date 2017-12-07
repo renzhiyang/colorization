@@ -32,7 +32,7 @@ def run_training1():
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
-    l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch_2channels = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
+    l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
 
     sparse_ab_batch = ab_batch * mask_batch_2channels
     replace_image = (ab_batch - sparse_ab_batch) + (index_ab_batch * mask_batch_2channels)
