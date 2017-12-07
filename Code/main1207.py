@@ -28,20 +28,21 @@ def run_training1():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
     #index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
     #mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1205"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1207"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
-    l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
+    l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch_2channels = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    #224*224*2  ,   56*56*2,      112*112*2
-    #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
-    out_ab_batch = model.built_network(ab_batch, mask_batch)
+    sparse_ab_batch = ab_batch * mask_batch_2channels
+    replace_image = (ab_batch - sparse_ab_batch) + (index_ab_batch * mask_batch_2channels)
+    mask_batch = mask_batch_2channels[:, :, :, 0]
+
+    out_ab_batch = model.built_network(replace_image, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    #train_loss = newModel.losses1123(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
-    train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch, sparse_ab_batch)
+    train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels, sparse_ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
@@ -79,10 +80,12 @@ def run_training1():
 
             if step % 10000 == 0:
                 l, ab, ab_index, ab_out = sess.run([l_batch, ab_batch, index_batch, out_ab_batch])
+                #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
                 ab_out = ab_out[0]
+                #replace_ab = replace_ab[0]
 
                 print([l[:, :, 0].min(), l[:, :, 0].max()])
                 print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
@@ -92,12 +95,14 @@ def run_training1():
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
                 ab_index = ab_index * 255 -128
+                #replace_ab = replace_ab * 255 -128
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
                 img_out = color.lab2rgb(img_out)
                 img_index = np.concatenate([l, ab_index], 2)
                 img_index = color.lab2rgb(img_index)
+
 
                 #print([l[:, :, 0].min(), l[:, :, 0].max()])
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
