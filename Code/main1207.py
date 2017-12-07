@@ -36,7 +36,7 @@ def run_training1():
 
     sparse_ab_batch = ab_batch * mask_batch_2channels
     replace_image = (ab_batch - sparse_ab_batch) + (index_ab_batch * mask_batch_2channels)
-    mask_batch = mask_batch_2channels[:, :, :, 0]
+    mask_batch = mask_batch_2channels[:, :, :, 0:1]
 
     out_ab_batch = model.built_network(replace_image, mask_batch)
     sess = tf.Session()
