@@ -32,7 +32,7 @@ def run_training1():
 
     # 获取输入
     image_list = input_data.get_image_list(train_dir, sparse_dir, mask_dir, index_dir)
-    l_batch, ab_batch, lab_batch, sparse_ab_batch, index_batch, mask_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
+    l_batch, ab_batch, lab_batch, sparse_ab_batch, index_ab_batch, mask_batch = input_data.get_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #224*224*2  ,   56*56*2,      112*112*2
     #out_ab_batch, layer1_batch, layer2_batch = newModel.built_network(lab_batch, sparse_ab_batch)
@@ -41,8 +41,8 @@ def run_training1():
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
     #train_loss = newModel.losses1123(out_ab_batch, layer1_batch, layer2_batch, index_batch, index_layer1, index_layer2)
-    train_loss = model.whole_loss(out_ab_batch, index_batch, mask_batch, sparse_ab_batch)
-    train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_batch)
+    train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch, sparse_ab_batch)
+    train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
     l_batch = tf.cast(l_batch, tf.float64)
