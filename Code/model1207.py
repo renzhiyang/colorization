@@ -117,7 +117,7 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch):
     with tf.name_scope('whole_loss') as scope:
         sobeled_loss = sobeled_losses(output_batch, index_batch)
         #mask_loss = mask_losses(output_batch, mask_batch_2channels, sparse_batch)
-        image_loss = L1_loss(output_batch, index_batch)
+        image_loss = L1_loss(output_batch, index_batch, name = "image_loss")
         loss = sobeled_loss + image_loss
         return loss
 
