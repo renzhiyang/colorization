@@ -164,3 +164,74 @@ def get_batch(file_list, batch_size, capacity):
                                num_threads=64)
 
     return l_batch, ab_bacth, lab_batch, sparse_ab_batch, index_batch, mask_batch
+
+def get_image_list2(train_dir, mask_dir, index_dir):
+    train_list = get_all_files(train_dir)       # 彩色图片
+    #train_list.extend(train_list)
+    #train_list.extend(train_list)
+    #sparse_list = get_all_files(sparse_dir)       # 颜色主题
+    index_list = get_all_files(index_dir)       # 颜色标签
+    mask_list = get_all_files(mask_dir)
+
+    print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
+    print("训练目录%s, 文件个数%d" % (sparse_dir, len(sparse_list)))
+    print("训练目录%s, 文件个数%d" % (index_dir, len(index_list)))
+
+    temp = np.array([train_list, mask_list, index_list])
+    temp = temp.transpose()
+    np.random.shuffle(temp)
+
+    train_list = list(temp[:, 0])
+    #sparse_list = list(temp[:, 1])
+    mask_list = list(temp[:, 1])
+    index_list = list(temp[:, 2])
+
+    return [train_list, mask_list, index_list]
+
+def get_batch2(file_list, batch_size, capacity):
+    image_size = 224
+
+    # 生成队列
+    filename_queue = tf.train.slice_input_producer(file_list, shuffle=False)
+
+    # 彩色图片处理
+    train_image = tf.read_file(filename_queue[0])
+    train_image = tf.image.decode_jpeg(train_image, channels=3)
+    #train_image = tf.image.decode_bmp(train_image)
+    train_image = tf.image.resize_images(train_image, [image_size, image_size])
+    train_image = tf.cast(train_image, tf.float64) / 255.0     # 转LAB空间需要float64
+    train_image = rgb_to_lab(train_image)
+    train_image = tf.cast(train_image, tf.float32)      # 神经网络需要float32
+    l_color = train_image[:, :, 0] / 100.0       # l范围[0, 100]
+    l_color = tf.reshape(l_color, [image_size, image_size, 1])
+    ab_color = (train_image[:, :, 1:] + 128) / 255.0     # ab范围[-128, 127]
+    train_image = tf.concat([l_color, ab_color], 2)
+
+    #mask_batch
+    train_mask = tf.read_file(filename_queue[1])
+    train_mask = tf.image.decode_bmp(train_mask, channels = 3)
+    train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
+    train_mask = tf.cast(train_mask, tf.float32) / 255.0
+    train_mask = train_mask[:, :, :1]
+
+
+    # 颜色标签处理
+    train_index = tf.read_file(filename_queue[2])
+    train_index = tf.image.decode_jpeg(train_index, channels=3)
+    train_index = tf.image.resize_images(train_index, [image_size, image_size])
+    train_index = tf.cast(train_index, tf.float64) / 255.0
+    train_index = rgb_to_lab(train_index)
+    train_index = tf.cast(train_index, tf.float32)
+    # l_index = train_index[:, :, 0] / 100.0
+    # l_index = tf.reshape(l_index, [image_size, image_size, 1])
+    ab_index = (train_index[:, :, 1:] + 128) / 255.0
+
+    # 获取batch
+    l_batch, ab_bacth, lab_batch, index_batch, mask_batch=\
+        tf.train.shuffle_batch([l_color, ab_color, train_image, ab_index, train_mask],
+                               batch_size=batch_size,
+                               capacity=capacity,
+                               min_after_dequeue=500,
+                               num_threads=64)
+
+    return l_batch, ab_bacth, lab_batch, index_batch, mask_batch
