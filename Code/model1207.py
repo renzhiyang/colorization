@@ -13,12 +13,12 @@ def build_ResnetBlock(inputres, dim, name = "resnet"):
         return tf.nn.relu(out_res + inputres)
 
 
-def built_network(input_ab_batch, sparse_batch, mask_batch):
+def built_network(replace_ab_batch, mask_batch):
     with tf.name_scope("network") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*5
-        input_batch = tf.concat([input_ab_batch, sparse_batch, mask_batch], 3)
+        # input_batch = 224*224*3
+        input_batch = tf.concat([replace_ab_batch, mask_batch], 3)
 
         # conv1_1 = 224*224*64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
@@ -104,22 +104,21 @@ def sobeled_losses(output_batch, index_batch, name = "sobeled_loss"):
         return loss
 
 #输出的图片中与sparse中相对应的点，与sparse做loss，也就是mask loss
-def mask_losses(output_batch, mask_batch, sparse_batch, name = "mask_loss"):
+def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_loss"):
     with tf.variable_scope(name):
-        a_batch = tf.multiply(output_batch[:, :, :, 0:1], mask_batch)
-        b_batch = tf.multiply(output_batch[:, :, :, 1:2], mask_batch)
-        outpoint_batch = tf.concat([a_batch, b_batch], 3)
-        mask_loss = L1_loss(output_batch, sparse_batch, name = "mask_loss")
+        outpoint_batch = mask_batch_2channels * output_batch
+        mask_loss = L1_loss(outpoint_batch, sparse_batch, name = "mask_L1_loss")
         return mask_loss
 
 
 
 #总的loss，供外部调用
-def whole_loss(output_batch, index_batch, mask_batch, sparse_batch):
+def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch):
     with tf.name_scope('whole_loss') as scope:
         sobeled_loss = sobeled_losses(output_batch, index_batch)
-        mask_loss = mask_losses(output_batch, mask_batch, sparse_batch)
-        loss = sobeled_loss + mask_loss
+        #mask_loss = mask_losses(output_batch, mask_batch_2channels, sparse_batch)
+        image_loss = L1_loss(output_batch, index_batch)
+        loss = sobeled_loss + image_loss
         return loss
 
 
