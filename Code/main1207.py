@@ -79,7 +79,7 @@ def run_training1():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 10000 == 0:
-                l, ab, ab_index, ab_out = sess.run([l_batch, ab_batch, index_batch, out_ab_batch])
+                l, ab, ab_index, ab_out = sess.run([l_batch, ab_batch, index_ab_batch, out_ab_batch])
                 #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
