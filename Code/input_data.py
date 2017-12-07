@@ -174,7 +174,7 @@ def get_image_list2(train_dir, mask_dir, index_dir):
     mask_list = get_all_files(mask_dir)
 
     print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
-    print("训练目录%s, 文件个数%d" % (sparse_dir, len(sparse_list)))
+    print("训练目录%s, 文件个数%d" % (mask_dir, len(mask_list)))
     print("训练目录%s, 文件个数%d" % (index_dir, len(index_list)))
 
     temp = np.array([train_list, mask_list, index_list])
