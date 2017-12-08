@@ -1,5 +1,5 @@
 # training.py  训练、测试
-
+from PIL import Image
 import tensorflow as tf
 import numpy as np
 import os
@@ -136,16 +136,22 @@ def run_training1():
     sess.close()
 
 
-def get_l_channel(image, image_size):
-    l_channel = tf.image.decode_jpeg(image, channels=3)
+def get_lab_channel(image, image_size, type):
+    if type == "jpg":
+        l_channel = tf.image.decode_jpeg(image, channels = 3)
+    if type == "bmp":
+        l_channel = tf.image.decode_bmp(image, channels = 3)
+
     l_channel = tf.image.resize_images(l_channel, [image_size, image_size])
     l_channel = tf.cast(l_channel, tf.float64) / 255.0
     l_channel = input_data.rgb_to_lab(l_channel)
     l_channel = tf.cast(l_channel, tf.float32)
     ab_channel = (l_channel[:, :, 1:] + 128) / 255.0
-    ab_channel = tf.reshape(ab_channel, [1, image_size, image_size, 2])
     l_channel = l_channel[:, :, 0] / 100.0
+    #lab_channel = tf.concat([l_channel, ab_channel], 2)
+    ab_channel = tf.reshape(ab_channel, [1, image_size, image_size, 2])
     l_channel = tf.reshape(l_channel, [1, image_size, image_size, 1])
+    #lab_channel = tf.reshape(lab_channel, [1, image_size, image_size, 3])
     # l_channel = tf.cast(l_channel, tf.float64)
 
     return l_channel, ab_channel
@@ -179,11 +185,114 @@ def get_output(l, ab):
 
     return img_out
 
+#produce a mask image and save it in mask_dir
+def get_mask(sparse_dir, mask_dir, image_size):
+    sparse = Image.open(sparse_dir)
+    sparse_img = sparse.load()
 
-def eval_one_image():
+    maskImg = Image.new("RGB", (image_size, image_size))
+    pmaskImg = maskImg.load()
+
+    for i in range(image_size):
+        for j in range(image_size):
+            if sparse_img[i, j] != (0, 0, 0):
+                pmaskImg[i, j] = (255, 255, 255, 255)
+    maskImg.save(mask_dir)
+
+def get_mask_channels(mask_img, image_size):
+    mask_img = tf.image.decode_bmp(mask_img)
+    mask_img = tf.cast(mask_img, tf.float32) / 255.0
+    mask_img =  tf.reshape(mask_img, [1, image_size, image_size, 3])
+    mask_one_channel = tf.reshape(mask_img[:, :, :, 0], [1, image_size, image_size, 1])
+    mask_two_channels = mask_img[:, :, :, 1:]
+    return mask_one_channel, mask_two_channels
+
+def test_one_image():
+    # sparse_name: blueLine, none, red&blue, red&blue2, redLine
+    test_Dir = "F:/Deep Learning/Code/colorization/test/test_images/41.bmp"
+    sparse_Dir = "F:/Deep Learning/Code/colorization/test/test_sparses/none.jpg"
+    output_Dir = "F:/Deep Learning/Code/colorization/test/out_images1207/41-blueSky-142500.jpg"
+    mask_Dir = "F:/Deep Learning/Code/colorization/test/test_masks/blueSky.bmp"
+    checkpoint_Dir = "F:/Deep Learning/Code/colorization/log_1207/model.ckpt-135000"
+    #checkpoint_Dir = "log_1207/model.ckpt-142500"
+
+    #get mask image
+    image_size = 224
+    get_mask(sparse_Dir, mask_Dir, image_size)
+
+    test_img = tf.read_file(test_Dir)
+    l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
+
+    sparse_img = tf.read_file(sparse_Dir)
+    l_sparse, ab_sparse = get_lab_channel(sparse_img, image_size, "jpg")
+
+    mask_img = tf.read_file(mask_Dir)
+    mask_one_channel, mask_two_channels = get_mask_channels(mask_img, image_size)
+
+
+    replace_ab_image = ab_channel - ab_channel * mask_two_channels + ab_sparse
+
+    ab_out = model.built_network(replace_ab_image, mask_one_channel)
+
+    #load ckpt file, load the model
+    logs_dir = 'F:/Deep Learning/Code/colorization/log_1207'
+    saver = tf.train.Saver()
+
+    sess = tf.Session()
+    print('载入检查点...')
+    ckpt = tf.train.get_checkpoint_state(logs_dir)
+    if ckpt and ckpt.model_checkpoint_path:
+        ckpt.model_checkpoint_path = checkpoint_Dir
+        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print('载入成功, global_step = %s' % global_step)
+    else:
+        print('载入失败')
+
+    l_channel = tf.cast(l_channel, tf.float64)
+    ab_channel = tf.cast(ab_channel, tf.float64)
+    ab_out = tf.cast(ab_out, tf.float64)
+
+    l_inputImage, ab_inputImage,  ab_outImage = sess.run([l_channel, ab_channel, ab_out])
+    l_inputImage = l_inputImage[0]
+    ab_inputImage = ab_inputImage[0]
+    ab_outImage = ab_outImage[0]
+
+    l_inputImage = l_inputImage * 100
+    ab_inputImage = ab_inputImage * 255 - 128
+    ab_outImage = ab_outImage * 255 - 128
+
+    image_in = np.concatenate([l_inputImage, ab_inputImage], 2)
+    image_out = np.concatenate([l_inputImage, ab_outImage], 2)
+    
+    image_in = color.lab2rgb(image_in)
+    image_out = color.lab2rgb(image_out)
+
+    #plt.subplot(2, 4, 1), plt.imshow(l_inputImage[:, :, 0], 'gray')
+    #plt.subplot(2, 4, 2), plt.imshow(ab_inputImage[:, :, 0], 'a')
+    #plt.subplot(2, 4, 3), plt.imshow(ab_inputImage[:, :, 1], 'b')
+    #plt.subplot(2, 4, 4), plt.imshow(image_in, 'image_in')
+
+    #plt.subplot(2, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+    #plt.subplot(2, 4, 2), plt.imshow(ab_outImage[:, :, 0], 'a')
+    #plt.subplot(2, 4, 3), plt.imshow(ab_outImage[:, :, 1], 'b')
+    #plt.subplot(2, 4, 4), plt.imshow(image_out, 'image_out')
+    #plt.show()
+
+    plt.imsave(output_Dir, image_out)
+
+
+
+def eval_one_image1():
+    # sparse_name: blueLine, none, red&blue, red&blue2, redLine
+    test_Dir = "test_images/5.bmp"
+    sparse_Dir = "test_sparses/redLine.jpg"
+    output_Dir = "out_images1207/5-redLine-142500.jpg"
+    checkpoint_Dir = "log_1207/model.ckpt-142500"
+
     image_size = 224
     test_image1 = tf.read_file('test_images2/1_2.jpg')
-    l_channel, ab_channel = get_l_channel(test_image1, image_size)
+    l_channel, ab_channel = get_lab_channel(test_image1, image_size)
     test_input = tf.concat([l_channel, ab_channel], 3)
 
     fix = '10'
@@ -221,6 +330,6 @@ def eval_one_image():
     plt.imsave('out_images/1_2_testout_' + fix + '.bmp', img_out1)
 
 
-run_training1()
-#eval_one_image()
+#run_training1()
+test_one_image()
 # test_batch_image()
