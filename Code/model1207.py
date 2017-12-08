@@ -46,7 +46,7 @@ def built_network(replace_ab_batch, mask_batch):
         # conv5_1 = 56*56*256
         #coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1")
-        conv5_1 = tf.concat(conv5_1, conv3_3, 3)
+        conv5_1 = tf.concat([conv5_1, conv3_3], 3)
         # conv5_2 = 56*56*256
         conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
         # conv5_3 = 56*56*256
@@ -54,13 +54,13 @@ def built_network(replace_ab_batch, mask_batch):
         # conv6_1 = 112*112*128
         #coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1")
-        conv6_1 = tf.concat(conv6_1, conv2_2, 3)
+        conv6_1 = tf.concat([conv6_1, conv2_2], 3)
         # conv6_2 = 112*112*128
         conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
         # conv7_1 = 224*224*64
         #coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         conv7_1 = general_deconv2d(conv6_2, filters, kernel_size, 2, name="conv7_1")
-        conv7_1 = tf.concat(conv7_1, conv1_2)
+        conv7_1 = tf.concat([conv7_1, conv1_2], 3)
         # conv7_2 = 224*224*64
         conv7_2 = general_conv2d(conv7_1, filters, kernel_size, 1, name="conv7_2")
         conv7_3 = general_conv2d(conv7_2, filters, kernel_size, 1, name="conv7_3")
