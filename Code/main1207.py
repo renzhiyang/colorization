@@ -28,7 +28,7 @@ def run_training1():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
     #index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
     #mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1207"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1208"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
