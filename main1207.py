@@ -17,7 +17,7 @@ MAX_STEP = 150000
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
 
-def run_training1():
+def run_training():
     train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
@@ -340,6 +340,6 @@ def eval_one_image1():
     plt.imsave('out_images/1_2_testout_' + fix + '.bmp', img_out1)
 
 
-#run_training1()
-test_one_image()
+run_training()
+#test_one_image()
 # test_batch_image()
