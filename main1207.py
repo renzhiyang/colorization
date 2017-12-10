@@ -28,7 +28,7 @@ def run_training1():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
     #index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
     #mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\log1208"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1210"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
@@ -80,13 +80,13 @@ def run_training1():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 10000 == 0:
-                l, ab, ab_index, ab_out = sess.run([l_batch, ab_batch, index_ab_batch, out_ab_batch])
+                l, ab, ab_index, ab_out, ab_replace = sess.run([l_batch, ab_batch, index_ab_batch, out_ab_batch, replace_image])
                 #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
                 ab_out = ab_out[0]
-                #replace_ab = replace_ab[0]
+                replace_ab = replace_ab[0]
 
                 print([l[:, :, 0].min(), l[:, :, 0].max()])
                 print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
@@ -96,33 +96,40 @@ def run_training1():
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
                 ab_index = ab_index * 255 -128
-                #replace_ab = replace_ab * 255 -128
+                replace_ab = replace_ab * 255 -128
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
                 img_out = color.lab2rgb(img_out)
                 img_index = np.concatenate([l, ab_index], 2)
                 img_index = color.lab2rgb(img_index)
+                replace_in = np.concatenate([l, replace_ab], 2)
+                replace_in = color.lab2rgb(replace_in)
 
 
                 #print([l[:, :, 0].min(), l[:, :, 0].max()])
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
                 #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
                 #print()
-                plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(3, 4, 4), plt.imshow(img_in)
+                plt.subplot(4, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(4, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(4, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(3, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(3, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(3, 4, 8), plt.imshow(img_out)
+                plt.subplot(4, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 6), plt.imshow(replace_ab[:, :, 0], 'gray')
+                plt.subplot(4, 4, 7), plt.imshow(replace_ab[:, :, 1], 'gray')
+                plt.subplot(4, 4, 8), plt.imshow(replace_in)
 
-                plt.subplot(3, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(3, 4, 12), plt.imshow(img_index)
+                plt.subplot(4, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 10), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(4, 4, 11), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(4, 4, 12), plt.imshow(img_out)
+
+                plt.subplot(4, 4, 13), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 14), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(4, 4, 15), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(4, 4, 16), plt.imshow(img_index)
                 plt.show()
 
 
