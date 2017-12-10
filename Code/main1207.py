@@ -207,14 +207,14 @@ def get_mask_channels(mask_img, image_size):
     mask_two_channels = mask_img[:, :, :, 1:]
     return mask_one_channel, mask_two_channels
 
+
 def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "F:/Deep Learning/Code/colorization/test/test_images/41.bmp"
-    sparse_Dir = "F:/Deep Learning/Code/colorization/test/test_sparses/none.jpg"
-    output_Dir = "F:/Deep Learning/Code/colorization/test/out_images1207/41-blueSky-142500.jpg"
-    mask_Dir = "F:/Deep Learning/Code/colorization/test/test_masks/blueSky.bmp"
-    checkpoint_Dir = "F:/Deep Learning/Code/colorization/log_1207/model.ckpt-135000"
-    #checkpoint_Dir = "log_1207/model.ckpt-142500"
+    test_Dir = "test_images/test (1).bmp"
+    sparse_Dir = "test_sparses/blue.bmp"
+    output_Dir = "output1210/1-blue.jpg"
+    mask_Dir = "test_mask/blue.bmp"
+    checkpoint_Dir = "log_1208/model.ckpt-149999"
 
     #get mask image
     image_size = 224
@@ -224,22 +224,23 @@ def test_one_image():
     l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
 
     sparse_img = tf.read_file(sparse_Dir)
-    l_sparse, ab_sparse = get_lab_channel(sparse_img, image_size, "jpg")
+    l_sparse, ab_sparse = get_lab_channel(sparse_img, image_size, "bmp")
 
     mask_img = tf.read_file(mask_Dir)
     mask_one_channel, mask_two_channels = get_mask_channels(mask_img, image_size)
 
+    #replace_ab_image = ab_channel - ab_channel * mask_two_channels + ab_sparse
 
-    replace_ab_image = ab_channel - ab_channel * mask_two_channels + ab_sparse
 
-    ab_out = model.built_network(replace_ab_image, mask_one_channel)
+    ab_out = model.built_network(ab_channel, mask_one_channel)
 
     #load ckpt file, load the model
-    logs_dir = 'F:/Deep Learning/Code/colorization/log_1207'
+    logs_dir = 'F:/Project_Yang/Code/mainProject/log1208'
     saver = tf.train.Saver()
 
     sess = tf.Session()
     print('载入检查点...')
+
     ckpt = tf.train.get_checkpoint_state(logs_dir)
     if ckpt and ckpt.model_checkpoint_path:
         ckpt.model_checkpoint_path = checkpoint_Dir
@@ -248,6 +249,7 @@ def test_one_image():
         print('载入成功, global_step = %s' % global_step)
     else:
         print('载入失败')
+
 
     l_channel = tf.cast(l_channel, tf.float64)
     ab_channel = tf.cast(ab_channel, tf.float64)
@@ -288,7 +290,7 @@ def eval_one_image1():
     test_Dir = "test_images/5.bmp"
     sparse_Dir = "test_sparses/redLine.jpg"
     output_Dir = "out_images1207/5-redLine-142500.jpg"
-    checkpoint_Dir = "log_1207/model.ckpt-142500"
+    checkpoint_Dir = "F:/Project_Yang/Code/mainProject/log_1208/model.ckpt-149999"
 
     image_size = 224
     test_image1 = tf.read_file('test_images2/1_2.jpg')
