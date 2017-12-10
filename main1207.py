@@ -34,12 +34,19 @@ def run_training():
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
     l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
 
-    sparse_ab_batch = ab_batch * mask_batch_2channels
-    replace_image = (ab_batch - sparse_ab_batch) + (index_ab_batch * mask_batch_2channels)
+    sparse_ab_batch = index_ab_batch * mask_batch_2channels
+    #replace images
+    replace_image = (ab_batch - ab_batch * mask_batch_2channels) + sparse_ab_batch
+
+    #concat images
+    input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
     mask_batch = mask_batch_2channels[:, :, :, 0]
     mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
-    out_ab_batch = model.built_network(replace_image, mask_batch)
+    #gray image input
+    gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+
+    out_ab_batch = model.built_network(gray_input, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -79,24 +86,26 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 10000 == 0:
-                l, ab, ab_index, ab_out, ab_replace = sess.run([l_batch, ab_batch, index_ab_batch, out_ab_batch, replace_image])
+            if step % 1000 == 0:
+                l, ab, ab_index, ab_out, replace_ab, ab_sparse = sess.run(
+                    [l_batch, ab_batch, index_ab_batch, out_ab_batch, replace_image, sparse_ab_batch])
                 #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
                 ab_out = ab_out[0]
                 replace_ab = replace_ab[0]
-
-                print([l[:, :, 0].min(), l[:, :, 0].max()])
-                print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
-                print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
+                ab_sparse = ab_sparse[0]
+                #mask = mask[0]
 
                 l = l * 100
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
                 ab_index = ab_index * 255 -128
                 replace_ab = replace_ab * 255 -128
+                ab_sparse =ab_sparse * 255 - 128
+
+
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
@@ -105,31 +114,38 @@ def run_training():
                 img_index = color.lab2rgb(img_index)
                 replace_in = np.concatenate([l, replace_ab], 2)
                 replace_in = color.lab2rgb(replace_in)
+                sparse_in = np.concatenate([l, ab_sparse], 2)
+                sparse_in = color.lab2rgb(sparse_in)
 
 
                 #print([l[:, :, 0].min(), l[:, :, 0].max()])
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
                 #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
                 #print()
-                plt.subplot(4, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(4, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(4, 4, 4), plt.imshow(img_in)
+                plt.subplot(5, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(5, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(5, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(4, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 6), plt.imshow(replace_ab[:, :, 0], 'gray')
-                plt.subplot(4, 4, 7), plt.imshow(replace_ab[:, :, 1], 'gray')
-                plt.subplot(4, 4, 8), plt.imshow(replace_in)
+                #plt.subplot(5, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                #plt.subplot(5, 4, 6), plt.imshow(replace_ab[:, :, 0], 'gray')
+                #plt.subplot(5, 4, 7), plt.imshow(replace_ab[:, :, 1], 'gray')
+                #plt.subplot(5, 4, 8), plt.imshow(replace_in)
 
-                plt.subplot(4, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 10), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(4, 4, 11), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(4, 4, 12), plt.imshow(img_out)
+                plt.subplot(5, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 10), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(5, 4, 11), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(5, 4, 12), plt.imshow(img_out)
 
-                plt.subplot(4, 4, 13), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 14), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(4, 4, 15), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(4, 4, 16), plt.imshow(img_index)
+                plt.subplot(5, 4, 13), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 14), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(5, 4, 15), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(5, 4, 16), plt.imshow(img_index)
+
+                #plt.subplot(5, 4, 17), plt.imshow(l[:, :, 0], 'gray')
+                #plt.subplot(5, 4, 18), plt.imshow(ab_sparse[:, :, 0], 'gray')
+                #plt.subplot(5, 4, 19), plt.imshow(ab_sparse[:, :, 1], 'gray')
+                #plt.subplot(5, 4, 20), plt.imshow(sparse_in)
                 plt.show()
 
 
@@ -160,26 +176,6 @@ def get_lab_channel(image, image_size, type):
     l_channel = tf.reshape(l_channel, [1, image_size, image_size, 1])
     #lab_channel = tf.reshape(lab_channel, [1, image_size, image_size, 3])
     return l_channel, ab_channel
-
-
-def get_theme(train_theme):
-    train_theme = tf.decode_raw(train_theme, tf.uint8)
-    # train_theme = tf.reshape(train_theme, [70]); train_theme = train_theme[-16:-1]
-    train_theme = tf.reshape(train_theme, [72]); train_theme = train_theme[-18:-3]
-    train_theme = tf.reshape(train_theme, [1, 5, 3])
-    R = train_theme[:, :, 2]
-    G = train_theme[:, :, 1]
-    B = train_theme[:, :, 0]
-    R = tf.reshape(R, [1, 5, 1])
-    G = tf.reshape(G, [1, 5, 1])
-    B = tf.reshape(B, [1, 5, 1])
-    train_theme = tf.concat([R, G, B], 2)
-    train_theme = tf.cast(train_theme, tf.float64) / 255.0
-    train_theme = input_data.rgb_to_lab(train_theme)
-    train_theme = tf.cast(train_theme, tf.float32)
-    ab_theme = (train_theme[:, :, 1:] + 128) / 255.0
-
-    return ab_theme
 
 
 def get_output(l, ab):
@@ -290,54 +286,6 @@ def test_one_image():
 
 
     plt.imsave(output_Dir, image_out)
-
-
-
-def eval_one_image1():
-    # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test_images/5.bmp"
-    sparse_Dir = "test_sparses/redLine.jpg"
-    output_Dir = "out_images1207/5-redLine-142500.jpg"
-    checkpoint_Dir = "F:/Project_Yang/Code/mainProject/log_1208/model.ckpt-149999"
-
-    image_size = 224
-    test_image1 = tf.read_file('test_images2/1_2.jpg')
-    l_channel, ab_channel = get_lab_channel(test_image1, image_size)
-    test_input = tf.concat([l_channel, ab_channel], 3)
-
-    fix = '10'
-    theme = tf.read_file('test_images2/theme_' + fix + '.bmp')
-    theme = get_theme(theme)
-
-    # TODO: 选择测试模型
-    out_ab = model.builtNetwork(test_input, theme)
-
-    # LAB转RGB需要float64
-    out_ab = tf.cast(out_ab, tf.float64)
-
-    # TODO: 选择检查点
-    logs_dir = 'logs_3_1'
-    saver = tf.train.Saver()
-
-    sess = tf.Session()
-    print('载入检查点...')
-    ckpt = tf.train.get_checkpoint_state(logs_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print('载入成功, global_step = %s' % global_step)
-    else:
-        print('载入失败')
-
-    l, ab = sess.run([l_channel, out_ab])
-    img_out1 = get_output(l[0], ab[0])
-
-    print([l[0, :, :, 0].min(), l[0, :, :, 0].max()])
-    print([ab[0, :, :, 0].min(), ab[0, :, :, 0].max()])
-    print([ab[0, :, :, 1].min(), ab[0, :, :, 1].max()])
-    print()
-
-    plt.imsave('out_images/1_2_testout_' + fix + '.bmp', img_out1)
 
 
 run_training()
