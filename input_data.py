@@ -106,24 +106,6 @@ def get_batch(file_list, batch_size, capacity):
     ab_color = (train_image[:, :, 1:] + 128) / 255.0     # ab范围[-128, 127]
     train_image = tf.concat([l_color, ab_color], 2)
 
-    # 颜色主题处理
-    # train_theme = tf.read_file(filename_queue[1])
-    # train_theme = tf.decode_raw(train_theme, tf.uint8)
-    # train_theme = tf.reshape(train_theme, [70])
-    # train_theme = train_theme[-16:-1]
-    # train_theme = tf.reshape(train_theme, [1, 5, 3])
-    # R = train_theme[:, :, 2]
-    # G = train_theme[:, :, 1]
-    # B = train_theme[:, :, 0]
-    # R = tf.reshape(R, [1, 5, 1])
-    # G = tf.reshape(G, [1, 5, 1])
-    # B = tf.reshape(B, [1, 5, 1])
-    # train_theme = tf.concat([R, G, B], 2)
-    # train_theme = tf.cast(train_theme, tf.float64) / 255.0
-    # train_theme = rgb_to_lab(train_theme)
-    # train_theme = tf.cast(train_theme, tf.float32)
-    # ab_theme = (train_theme[:, :, 1:] + 128) / 255.0
-    # # ab_theme = tf.reshape(ab_theme, [1, 1, -1])
     train_theme = tf.read_file(filename_queue[1])
     #train_theme = tf.image.decode_jpeg(train_theme, channels=3)
     train_theme = tf.image.decode_bmp(train_theme, channels = 3)
@@ -202,9 +184,11 @@ def get_batch2(file_list, batch_size, capacity):
     train_image = tf.cast(train_image, tf.float64) / 255.0     # 转LAB空间需要float64
     train_image = rgb_to_lab(train_image)
     train_image = tf.cast(train_image, tf.float32)      # 神经网络需要float32
-    l_color = train_image[:, :, 0] / 100.0       # l范围[0, 100]
+    #l_color = train_image[:, :, 0] / 100.0       # l范围[0, 100]
+    l_color = train_image[:, :, 0]
     l_color = tf.reshape(l_color, [image_size, image_size, 1])
-    ab_color = (train_image[:, :, 1:] + 128) / 255.0     # ab范围[-128, 127]
+    #ab_color = (train_image[:, :, 1:] + 128) / 255.0     # ab范围[-128, 127]
+    ab_color = train_image[:, :, 1:]
     train_image = tf.concat([l_color, ab_color], 2)
 
     #mask_batch
@@ -224,7 +208,8 @@ def get_batch2(file_list, batch_size, capacity):
     train_index = tf.cast(train_index, tf.float32)
     # l_index = train_index[:, :, 0] / 100.0
     # l_index = tf.reshape(l_index, [image_size, image_size, 1])
-    ab_index = (train_index[:, :, 1:] + 128) / 255.0
+    #ab_index = (train_index[:, :, 1:] + 128) / 255.0
+    ab_index = train_index[:, :, 1:]
 
     # 获取batch
     l_batch, ab_bacth, lab_batch, index_batch, mask_batch_2channels =\
