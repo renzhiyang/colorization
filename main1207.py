@@ -40,8 +40,10 @@ def run_training():
 
     #do '+ - * /' before normalization
     l_batch = l_batch / 100
-    ab_batch = (ab_batch * 255) - 128
-    index_ab_batch = (index_ab_batch * 255) - 128
+    ab_batch = (ab_batch + 128) / 255
+    index_ab_batch = (index_ab_batch + 128) / 255
+    sparse_ab_batch = (sparse_ab_batch + 128) / 255
+    replace_image = (replace_image + 128) / 255
 
     #concat images
     input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
@@ -49,9 +51,9 @@ def run_training():
     mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
     #gray image input
-    gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    #gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
 
-    out_ab_batch = model.built_network(gray_input, mask_batch)
+    out_ab_batch = model.built_network(replace_image, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -92,23 +94,19 @@ def run_training():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 1000 == 0:
-                l, ab, ab_index, ab_out, replace_ab, ab_sparse = sess.run(
-                    [l_batch, ab_batch, index_ab_batch, out_ab_batch, replace_image, sparse_ab_batch])
+                l, ab, ab_index, ab_out = sess.run(
+                    [l_batch, ab_batch, index_ab_batch, out_ab_batch])
                 #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
                 ab_out = ab_out[0]
-                replace_ab = replace_ab[0]
-                ab_sparse = ab_sparse[0]
                 #mask = mask[0]
 
                 l = l * 100
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
                 ab_index = ab_index * 255 -128
-                replace_ab = replace_ab * 255 -128
-                ab_sparse =ab_sparse * 255 - 128
 
 
                 img_in = np.concatenate([l, ab], 2)
@@ -117,40 +115,26 @@ def run_training():
                 img_out = color.lab2rgb(img_out)
                 img_index = np.concatenate([l, ab_index], 2)
                 img_index = color.lab2rgb(img_index)
-                replace_in = np.concatenate([l, replace_ab], 2)
-                replace_in = color.lab2rgb(replace_in)
-                sparse_in = np.concatenate([l, ab_sparse], 2)
-                sparse_in = color.lab2rgb(sparse_in)
 
 
                 #print([l[:, :, 0].min(), l[:, :, 0].max()])
                 #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
                 #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
                 #print()
-                plt.subplot(5, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(5, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(5, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(5, 4, 4), plt.imshow(img_in)
+                plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(3, 4, 4), plt.imshow(img_in)
 
-                #plt.subplot(5, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                #plt.subplot(5, 4, 6), plt.imshow(replace_ab[:, :, 0], 'gray')
-                #plt.subplot(5, 4, 7), plt.imshow(replace_ab[:, :, 1], 'gray')
-                #plt.subplot(5, 4, 8), plt.imshow(replace_in)
+                plt.subplot(3, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(3, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(3, 4, 8), plt.imshow(img_out)
 
-                plt.subplot(5, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(5, 4, 10), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(5, 4, 11), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(5, 4, 12), plt.imshow(img_out)
-
-                plt.subplot(5, 4, 13), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(5, 4, 14), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(5, 4, 15), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(5, 4, 16), plt.imshow(img_index)
-
-                #plt.subplot(5, 4, 17), plt.imshow(l[:, :, 0], 'gray')
-                #plt.subplot(5, 4, 18), plt.imshow(ab_sparse[:, :, 0], 'gray')
-                #plt.subplot(5, 4, 19), plt.imshow(ab_sparse[:, :, 1], 'gray')
-                #plt.subplot(5, 4, 20), plt.imshow(sparse_in)
+                plt.subplot(3, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(3, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(3, 4, 12), plt.imshow(img_index)
                 plt.show()
 
 
