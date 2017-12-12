@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 5
+BATCH_SIZE = 3
 CAPACITY = 1000     # 队列容量
 MAX_STEP = 150000
 
@@ -93,15 +93,13 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 1000 == 0:
+            if step % 2000 == 0:
                 l, ab, ab_index, ab_out = sess.run(
                     [l_batch, ab_batch, index_ab_batch, out_ab_batch])
-                #replace_ab = sess.run(replace_image)
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
                 ab_out = ab_out[0]
-                #mask = mask[0]
 
                 l = l * 100
                 ab = ab * 255 - 128
@@ -116,11 +114,6 @@ def run_training():
                 img_index = np.concatenate([l, ab_index], 2)
                 img_index = color.lab2rgb(img_index)
 
-
-                #print([l[:, :, 0].min(), l[:, :, 0].max()])
-                #print([ab_out[:, :, 0].min(), ab_out[:, :, 0].max()])
-                #print([ab_out[:, :, 1].min(), ab_out[:, :, 1].max()])
-                #print()
                 plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
                 plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
                 plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
@@ -136,6 +129,29 @@ def run_training():
                 plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
                 plt.subplot(3, 4, 12), plt.imshow(img_index)
                 plt.show()
+                xticks = [-127, -80, -40, 0, 40, 80, 128]
+                yticks = [-127, -80, -40, 0, 40, 80, 128]
+
+                plt.subplot(1, 3, 1), plt.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5,edgecolors= 'white')
+                plt.title('input image')
+                plt.xlabel('a')
+                plt.ylabel('b')
+                plt.grid(True)
+
+                plt.subplot(1, 3, 2), plt.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolors='white')
+                plt.title('output image')
+                plt.xlabel('a')
+                plt.ylabel('b')
+                plt.grid(True)
+
+                plt.subplot(1, 3, 3), plt.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolors='white')
+                plt.title('index image')
+                plt.xlabel('a')
+                plt.ylabel('b')
+                plt.grid(True)
+                plt.show()
+
+
 
 
     except tf.errors.OutOfRangeError:
