@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 
-
 def log10(x):
   numerator = tf.log(x)
   denominator = tf.log(tf.constant(10, dtype=numerator.dtype))
@@ -19,11 +18,12 @@ def lrelu(x, leak=0.2, name="lrelu", alt_relu_impl=False):
         else:
             return tf.maximum(x, leak*x)
 
-#batch normalize
-def batch_norm_layer(x, train_phase = True):
+#old batch normalize
+def batch_norm_layer(x, training = tf.constant(True)):
     with tf.variable_scope("batch_norm"):
         beta = tf.Variable(tf.constant(0.0, shape=[x.shape[-1]]), name='beta', trainable=True)
         gamma = tf.Variable(tf.constant(1.0, shape=[x.shape[-1]]), name='gamma', trainable=True)
+        #global
         #axises = np.arange(len(x.shape) - 1)
         axises = [0]
         batch_mean, batch_var = tf.nn.moments(x, axises, name='moments')
@@ -34,7 +34,7 @@ def batch_norm_layer(x, train_phase = True):
             with tf.control_dependencies([ema_apply_op]):
                 return tf.identity(batch_mean), tf.identity(batch_var)
 
-        mean, var = tf.cond(train_phase, mean_var_with_update,
+        mean, var = tf.cond(training, mean_var_with_update,
                             lambda: (ema.average(batch_mean), ema.average(batch_var)))
         normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
     return normed
