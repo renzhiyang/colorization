@@ -196,7 +196,9 @@ def get_batch2(file_list, batch_size, capacity):
     train_mask = tf.image.decode_bmp(train_mask, channels = 3)
     train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
     train_mask = tf.cast(train_mask, tf.float32) / 255.0
-    train_mask = train_mask[:, :, 0:2]
+    train_mask_2channels = train_mask[:, :, 0:2]
+    train_mask = train_mask[:, :, 0]
+    train_mask = tf.reshape(train_mask, [image_size, image_size, 1])
 
 
     # 颜色标签处理
@@ -212,11 +214,11 @@ def get_batch2(file_list, batch_size, capacity):
     ab_index = train_index[:, :, 1:]
 
     # 获取batch
-    l_batch, ab_bacth, lab_batch, index_batch, mask_batch_2channels =\
-        tf.train.shuffle_batch([l_color, ab_color, train_image, ab_index, train_mask],
+    l_batch, ab_bacth, index_batch, mask_batch, mask_batch_2channels =\
+        tf.train.shuffle_batch([l_color, ab_color, ab_index, train_mask, train_mask_2channels],
                                batch_size=batch_size,
                                capacity=capacity,
                                min_after_dequeue=500,
                                num_threads=64)
 
-    return l_batch, ab_bacth, lab_batch, index_batch, mask_batch_2channels
+    return l_batch, ab_bacth, index_batch, mask_batch, mask_batch_2channels
