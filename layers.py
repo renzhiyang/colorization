@@ -24,7 +24,8 @@ def batch_norm_layer(x, train_phase = True):
     with tf.variable_scope("batch_norm"):
         beta = tf.Variable(tf.constant(0.0, shape=[x.shape[-1]]), name='beta', trainable=True)
         gamma = tf.Variable(tf.constant(1.0, shape=[x.shape[-1]]), name='gamma', trainable=True)
-        axises = np.arange(len(x.shape) - 1)
+        #axises = np.arange(len(x.shape) - 1)
+        axises = [0]
         batch_mean, batch_var = tf.nn.moments(x, axises, name='moments')
         ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
