@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 3
+BATCH_SIZE = 10
 CAPACITY = 1000     # 队列容量
 MAX_STEP = 150000
 
@@ -22,17 +22,11 @@ def run_training():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
-
-
-    #train_dir = "F:\\Project_Yang\\Database\\database_test\\train_images"
-    #sparse_dir = "F:\\Project_Yang\\Database\\database_test\\sparse_images"
-    #index_dir = "F:\\Project_Yang\\Database\\database_test\\index_images"
-    #mask_dir = "F:\\Project_Yang\\Database\\database_test\\mask_images"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1210"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
-    l_batch, ab_batch, lab_batch, index_ab_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
+    l_batch, ab_batch, index_ab_batch, mask_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
 
     sparse_ab_batch = index_ab_batch * mask_batch_2channels
     #replace images
@@ -47,13 +41,14 @@ def run_training():
 
     #concat images
     input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
-    mask_batch = mask_batch_2channels[:, :, :, 0]
-    mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
+    #mask_batch = mask_batch_2channels[:, :, :, 0]
+    #mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
     #gray image input
     #gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
 
-    out_ab_batch = model.built_network(replace_image, mask_batch)
+    #concat image_ab and sparse_ab as input
+    out_ab_batch = model.built_network(input_batch, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -61,8 +56,8 @@ def run_training():
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-    l_batch = tf.cast(l_batch, tf.float64)
-    lab_batch = tf.cast(lab_batch, tf.float64)
+    #l_batch = tf.cast(l_batch, tf.float64)
+    #lab_batch = tf.cast(lab_batch, tf.float64)
 
     summary_op = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
