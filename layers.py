@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 def log10(x):
   numerator = tf.log(x)
   denominator = tf.log(tf.constant(10, dtype=numerator.dtype))
