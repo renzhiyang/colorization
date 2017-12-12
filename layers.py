@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 def log10(x):
   numerator = tf.log(x)
