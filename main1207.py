@@ -56,7 +56,7 @@ def run_training():
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-    #l_batch = tf.cast(l_batch, tf.float64)
+    l_batch = tf.cast(l_batch, tf.float64)
     #lab_batch = tf.cast(lab_batch, tf.float64)
 
     summary_op = tf.summary.merge_all()
