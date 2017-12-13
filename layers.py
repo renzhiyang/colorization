@@ -68,7 +68,7 @@ def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=True, do_re
                                        scope=name)
 
         if do_norm:
-            conv = batch_norm_layer(conv)
+            conv = instance_norm(conv)
 
         if do_relu:
             if(relufactor == 0):
@@ -90,7 +90,7 @@ def general_deconv2d(inputconv, filters, kernel_size, strides, padding = "SAME",
                                         padding = padding)
 
         if do_norm:
-            conv = batch_norm_layer(conv)
+            conv = instance_norm(conv)
 
         if do_relu:
             if(relufactor == 0):
