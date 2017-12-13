@@ -4,7 +4,11 @@ import os
 import random
 
 from layers import *
-
+def upsample_layer(image_batch, scale, scope_name):
+    height, width = image_batch.shape[1:3]
+    scale_h = int(height*scale)
+    scale_w = int(width*scale)
+    return tf.image.resize_nearest_neighbor(image_batch, [scale_h, scale_w], name = scope_name)
 
 def build_ResnetBlock(inputres, dim, name = "resnet"):
     with tf.variable_scope(name):
@@ -60,6 +64,60 @@ def built_network(replace_ab_batch, mask_batch):
         # conv7_1 = 224*224*128
         #coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         conv7_1 = general_deconv2d(conv6_2, filters * 2, kernel_size, 2, name="conv7_1")
+        conv7_1 = tf.concat([conv7_1, conv1_2], 3)
+        # conv7_2 = 224*224*128
+        conv7_2 = general_conv2d(conv7_1, filters * 2, kernel_size, 1, name="conv7_2")
+        conv7_3 = general_conv2d(conv7_2, filters * 2, kernel_size, 1, name="conv7_3")
+        # conv8_1 = 224*224*2
+        conv8_1 = general_conv2d(conv7_3, 2, 1, 1, name="conv8_1")
+
+        return tf.nn.tanh(conv8_1, name="output")
+
+def built_network1212(input_ab_batch, mask_batch):
+    with tf.name_scope("network") as scope:
+        kernel_size = 3
+        filters = 64
+        # input_batch = 224*224*3
+        input_batch = tf.concat([input_ab_batch, mask_batch], 3)
+
+        # conv1_1 = 224*224*64
+        conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
+        # conv1_2 = 224*224*64
+        conv1_2 = general_conv2d(conv1_1, filters, kernel_size, 1, name="conv1_2")
+        # conv2_1 = 112*112*128
+        conv2_1 = general_conv2d(conv1_2, filters * 2, kernel_size, 2, name="conv2_1")
+        # conv2_2 = 112*112*128
+        conv2_2 = general_conv2d(conv2_1, filters * 2, kernel_size, 1, name="conv2_2")
+        # conv3_1 = 56*56*256
+        conv3_1 = general_conv2d(conv2_2, filters * 4, kernel_size, 2, name="conv3_1")
+        # conv3_2 = 56*56*256
+        conv3_2 = general_conv2d(conv3_1, filters * 4, kernel_size, 1, name="conv3_2")
+        # conv3_3 = 56*56*256
+        conv3_3 = general_conv2d(conv3_2, filters * 4, kernel_size, 1, name="conv3_3")
+
+        # middle level 50*28*28*512 , 建立四个resnet的block
+        conv4 = general_conv2d(conv3_3, filters * 8, kernel_size, 2, name="conv4")
+        conv4_1 = build_ResnetBlock(conv4, filters * 8, name="conv4_1")
+        conv4_2 = build_ResnetBlock(conv4_1, filters * 8, name="conv4_2")
+        conv4_3 = build_ResnetBlock(conv4_2, filters * 8, name="conv4_3")
+        conv4_4 = build_ResnetBlock(conv4_3, filters * 8, name="conv4_4")
+
+
+        # conv5_1 = 56*56*256
+        conv5_1 = upsample_layer(conv4_4, 2, scope_name = "conv5_1")
+        conv5_1 = tf.concat([conv5_1, conv3_3], 3)
+        # conv5_2 = 56*56*256
+        conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
+        # conv5_3 = 56*56*256
+        conv5_3 = general_conv2d(conv5_2, filters * 4, kernel_size, 1, name="conv5_3")
+        # conv6_1 = 112*112*128
+        conv6_1 = upsample_layer(conv5_3, 2, scope_name = "conv6_1")
+        conv6_1 = tf.concat([conv6_1, conv2_2], 3)
+        # conv6_2 = 112*112*128
+        conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
+        # conv7_1 = 224*224*128
+        #coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv7_1 = upsample_layer(conv6_2, 2, scope_name="conv7_1")
         conv7_1 = tf.concat([conv7_1, conv1_2], 3)
         # conv7_2 = 224*224*128
         conv7_2 = general_conv2d(conv7_1, filters * 2, kernel_size, 1, name="conv7_2")
