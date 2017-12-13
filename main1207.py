@@ -23,6 +23,7 @@ def run_training():
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1212"
+    result_dir = "results/1212/"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
@@ -123,38 +124,38 @@ def run_training():
                 plt.subplot(3, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
                 plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
                 plt.subplot(3, 4, 12), plt.imshow(img_index)
+                plt.savefig(result_dir + str(step) + "_image.png")
                 plt.show()
-                xticks = [-127, -80, -40, 0, 40, 80, 128]
-                yticks = [-127, -80, -40, 0, 40, 80, 128]
 
 
 
                 plt.figure(figsize=(8,8))
                 axes1 = plt.subplot(221)
-                axes1.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5,edgecolors= 'white', s=5)
+                axes1.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5,edgecolors= 'white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('input images')
 
                 axes2 = plt.subplot(222)
-                axes2.scatter(ab_out[:, :, 0], ab_out[:, :, 1],alpha=0.5,edgecolors= 'white', s=5)
+                axes2.scatter(ab_out[:, :, 0], ab_out[:, :, 1],alpha=0.5,edgecolors= 'white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('output images')
 
                 axes3 = plt.subplot(223)
-                axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolors='white', s=5)
+                axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolors='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('index images')
 
                 axes4 = plt.subplot(224)
-                part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, label='image_in', edgecolors = 'white', s=5)
-                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, label='image_out', edgecolors='white', c = 'r', s=5)
-                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, label='image_index', edgecolors='white', c='g', s=5)
+                part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, label='image_in', edgecolors = 'white', s=8)
+                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, label='image_out', edgecolors='white', c = 'r', s=8)
+                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, label='image_index', edgecolors='white', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
 
