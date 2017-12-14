@@ -226,9 +226,9 @@ def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/test (5).bmp"
     sparse_Dir = "test/test_sparses/blue.bmp"
-    output_Dir = "output/output1210/5-blue.jpg"
+    output_Dir = "output/output1212/5-blue.jpg"
     mask_Dir = "test/test_mask/blue.bmp"
-    checkpoint_Dir = "logs/log1208/model.ckpt-149999"
+    checkpoint_Dir = "logs/log1212/model.ckpt-97500"
 
     #get mask image
     image_size = 224
@@ -252,7 +252,7 @@ def test_one_image():
     middle_ab_image = (middle_ab_image + 128) / 255
     ab_channel = (ab_channel + 128) / 255
 
-    ab_out = model.built_network(replace_ab_image, mask_one_channel)
+    ab_out = model.built_network1212(replace_ab_image, mask_one_channel)
 
     #load ckpt file, load the model
     logs_dir = 'F:/Project_Yang/Code/mainProject/logs/log1208'
@@ -328,6 +328,6 @@ def test_one_image():
     plt.imsave(output_Dir, image_out)
 
 
-run_training()
-#test_one_image()
+#run_training()
+test_one_image()
 # test_batch_image()
