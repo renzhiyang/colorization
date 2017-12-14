@@ -174,12 +174,28 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
 
 
 #总的loss，供外部调用
-def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch):
+def whole_loss1214(output_batch, index_batch, mask_batch_2channels, sparse_batch, input_batch):
     with tf.name_scope('whole_loss') as scope:
         sobeled_loss = sobeled_losses(output_batch, index_batch)
         #mask_loss = mask_losses(output_batch, mask_batch_2channels, sparse_batch)
-        image_loss = L1_loss(output_batch, index_batch, name = "image_loss")
-        loss = sobeled_loss + image_loss
+        index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
+        ori_loss = L1_loss(output_batch, input_batch, name = "ori_loss")
+        image_loss = 0.9 * index_loss + 0.1 * ori_loss
+        loss = image_loss + sobeled_loss
+        tf.summary.scalar("whole_loss", loss)
+        tf.summary.scalar("Image_loss", loss)
+        return loss
+
+#总的loss，供外部调用
+def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch, input_batch):
+    with tf.name_scope('whole_loss') as scope:
+        sobeled_loss = sobeled_losses(output_batch, index_batch)
+        #mask_loss = mask_losses(output_batch, mask_batch_2channels, sparse_batch)
+        index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
+        #ori_loss = L1_loss(output_batch, input_batch, name = "ori_loss")
+        #image_loss = index_loss + ori_loss
+        loss = index_loss + sobeled_loss
+        tf.summary.scalar("whole_loss", loss)
         return loss
 
 
