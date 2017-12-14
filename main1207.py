@@ -251,8 +251,9 @@ def test_one_image():
     ab_sparse = (ab_sparse + 128) / 255
     middle_ab_image = (middle_ab_image + 128) / 255
     ab_channel = (ab_channel + 128) / 255
+    input_batch = tf.concat([ab_channel, ab_sparse], 3)
 
-    ab_out = model.built_network1212(replace_ab_image, mask_one_channel)
+    ab_out = model.built_network1212(input_batch, mask_one_channel)
 
     #load ckpt file, load the model
     logs_dir = 'F:/Project_Yang/Code/mainProject/logs/log1208'
