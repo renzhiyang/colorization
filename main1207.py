@@ -52,7 +52,7 @@ def run_training():
     out_ab_batch = model.built_network1212(input_batch, mask_batch)
     sess = tf.Session()
 
-    global_step = tf.train.get_or_create_global_step(sess.graph)
+    #global_step = tf.train.get_or_create_global_step(sess.graph)
     train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels, sparse_ab_batch, ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
