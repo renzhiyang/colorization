@@ -183,7 +183,7 @@ def whole_loss1214(output_batch, index_batch, mask_batch_2channels, sparse_batch
         image_loss = 0.9 * index_loss + 0.1 * ori_loss
         loss = image_loss + sobeled_loss
         tf.summary.scalar("whole_loss", loss)
-        #tf.summary.scalar("Image_loss", loss)
+        tf.summary.scalar("Image_loss", loss)
         return loss
 
 #总的loss，供外部调用
