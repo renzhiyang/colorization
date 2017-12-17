@@ -202,7 +202,7 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch, in
 def get_PSNR(out_ab_batch, index_ab_batch):
     b = 8
     MAX = 2 ** b - 1
-    #RMSE = tf.sqrt(tf.reduce_mean(tf.squared_difference(out_ab_batch, index_ab_batch)))
+    RMSE = tf.sqrt(tf.reduce_mean(tf.squared_difference(out_ab_batch, index_ab_batch)))
     PSNR = 10 * log10( MAX / RMSE)
     tf.summary.scalar('RMSE', RMSE)
     tf.summary.scalar('PSNR', PSNR)
