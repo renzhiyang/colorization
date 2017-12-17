@@ -22,8 +22,8 @@ def run_training():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1214"
-    result_dir = "results/1214/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1215"
+    result_dir = "results/1215/"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
@@ -53,7 +53,7 @@ def run_training():
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = model.whole_loss1214(out_ab_batch, index_ab_batch, mask_batch_2channels, sparse_ab_batch, ab_batch)
+    train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels, sparse_ab_batch, ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
@@ -131,27 +131,27 @@ def run_training():
 
                 plt.figure(figsize=(8,8))
                 axes1 = plt.subplot(221)
-                axes1.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5,edgecolors= 'white', s=8)
+                axes1.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('input images')
 
                 axes2 = plt.subplot(222)
-                axes2.scatter(ab_out[:, :, 0], ab_out[:, :, 1],alpha=0.5,edgecolors= 'white', s=8)
+                axes2.scatter(ab_out[:, :, 0], ab_out[:, :, 1],alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('output images')
 
                 axes3 = plt.subplot(223)
-                axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolors='white', s=8)
+                axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('index images')
 
                 axes4 = plt.subplot(224)
-                part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, label='image_in', edgecolors = 'white', s=8)
-                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, label='image_out', edgecolors='white', c = 'r', s=8)
-                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, label='image_index', edgecolors='white', c='g', s=8)
+                part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
+                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
+                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
@@ -224,10 +224,10 @@ def get_mask_channels(mask_img, image_size):
 
 def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/index (2).bmp"
-    sparse_Dir = "test/test_sparses/blue1.bmp"
-    output_Dir = "output/output1212/index2-blue1.jpg"
-    mask_Dir = "test/test_mask/blue1.bmp"
+    test_Dir = "test/test_images/2.bmp"
+    sparse_Dir = "test/test_sparses/2.bmp"
+    output_Dir = "output/output1212/2.jpg"
+    mask_Dir = "test/test_mask/2.bmp"
     checkpoint_Dir = "logs/log1212/model.ckpt-97500"
 
     #get mask image
