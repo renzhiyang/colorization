@@ -224,10 +224,10 @@ def get_mask_channels(mask_img, image_size):
 
 def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/2.bmp"
-    sparse_Dir = "test/test_sparses/2.bmp"
-    output_Dir = "output/output1215/2.jpg"
-    mask_Dir = "test/test_mask/2.bmp"
+    test_Dir = "test/test_images/levin.bmp"
+    sparse_Dir = "test/test_sparses/none.bmp"
+    output_Dir = "output/output1215/levin-none.jpg"
+    mask_Dir = "test/test_mask/none.bmp"
     checkpoint_Dir = "logs/log1215/model.ckpt-149999"
 
     #get mask image
@@ -235,7 +235,7 @@ def test_one_image():
     get_mask(sparse_Dir, mask_Dir, image_size)
 
     test_img = tf.read_file(test_Dir)
-    l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
+    l_channel, ab_channel = get_lab_channel(test_img, image_size, "bmp")
 
     sparse_img = tf.read_file(sparse_Dir)
     l_sparse, ab_sparse = get_lab_channel(sparse_img, image_size, "bmp")
@@ -285,7 +285,7 @@ def test_one_image():
     ab_middle = ab_middle[0]
 
     print(ab_spar[:, :, 0].min(), ab_spar[:, :, 0].max())
-    print(ab_replace[:, :, 0].min(), ab_replace[:, :, 0].max())
+    print(ab_outImage[:, :, 0].min(), ab_outImage[:, :, 0].max())
     print(ab_middle[:, :, 0].min(), ab_middle[:, :, 0].max())
 
     l_inputImage = l_inputImage * 100
