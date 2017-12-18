@@ -22,8 +22,8 @@ def run_training():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1215"
-    result_dir = "results/1215/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
+    result_dir = "results/1218/"
 
     # 获取输入
     image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
@@ -41,15 +41,15 @@ def run_training():
     replace_image = (replace_image + 128) / 255
 
     #concat images
-    input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
+    #input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
     #mask_batch = mask_batch_2channels[:, :, :, 0]
     #mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
     #gray image input
-    #gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.built_network1212(input_batch, mask_batch)
+    out_ab_batch = model.built_network1212(gray_input, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -329,6 +329,6 @@ def test_one_image():
     plt.imsave(output_Dir, image_out)
 
 
-#run_training()
-test_one_image()
+run_training()
+#test_one_image()
 # test_batch_image()
