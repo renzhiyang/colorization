@@ -226,9 +226,9 @@ def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/2.bmp"
     sparse_Dir = "test/test_sparses/2.bmp"
-    output_Dir = "output/output1212/2.jpg"
+    output_Dir = "output/output1215/2.jpg"
     mask_Dir = "test/test_mask/2.bmp"
-    checkpoint_Dir = "logs/log1212/model.ckpt-97500"
+    checkpoint_Dir = "logs/log1215/model.ckpt-149999"
 
     #get mask image
     image_size = 224
