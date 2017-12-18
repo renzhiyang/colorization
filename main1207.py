@@ -329,6 +329,6 @@ def test_one_image():
     plt.imsave(output_Dir, image_out)
 
 
-run_training()
-#test_one_image()
+#run_training()
+test_one_image()
 # test_batch_image()
