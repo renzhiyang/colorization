@@ -225,9 +225,9 @@ def get_mask_channels(mask_img, image_size):
 def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/levin.bmp"
-    sparse_Dir = "test/test_sparses/none.bmp"
-    output_Dir = "output/output1215/levin-none.jpg"
-    mask_Dir = "test/test_mask/none.bmp"
+    sparse_Dir = "test/test_sparses/levin.bmp"
+    output_Dir = "output/output1215/levin-2.jpg"
+    mask_Dir = "test/test_mask/levin.bmp"
     checkpoint_Dir = "logs/log1215/model.ckpt-149999"
 
     #get mask image
