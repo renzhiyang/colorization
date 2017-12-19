@@ -22,7 +22,7 @@ def run_training():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
-    #logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
     result_dir = "results/1218/"
 
     # 获取输入
@@ -53,7 +53,7 @@ def run_training():
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels, sparse_ab_batch, ab_batch)
+    train_loss = model.gray_colorization_loss(out_ab_batch, index_ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
