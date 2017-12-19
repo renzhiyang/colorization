@@ -46,7 +46,7 @@ def run_training():
     #mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
     #gray image input
-    #gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
 
     #concat image_ab and sparse_ab as input
     out_ab_batch = model.built_network1212(gray_input, mask_batch)
