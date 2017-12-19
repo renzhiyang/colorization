@@ -52,6 +52,9 @@ def get_all_files(file_path):
     filename_list = []
 
     for item in os.listdir(file_path):
+        if len(filename_list) >= 100602:
+            break
+
         path = file_path + '\\' + item
         if os.path.isdir(path):     # 如果是文件夹
             filename_list.extend(get_all_files(path))
@@ -232,7 +235,6 @@ def get_image_list1219(train_dir, mask_dir):
     temp = np.array([train_list, mask_list])
     temp = temp.transpose()
     np.random.shuffle(temp)
-
     train_list = list(temp[:, 0])
     #sparse_list = list(temp[:, 1])
     mask_list = list(temp[:, 1])
