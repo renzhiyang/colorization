@@ -22,7 +22,7 @@ def run_training():
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
+    #logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
     result_dir = "results/1218/"
 
     # 获取输入
