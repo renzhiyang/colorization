@@ -222,3 +222,60 @@ def get_batch2(file_list, batch_size, capacity):
                                num_threads=64)
 
     return l_batch, ab_bacth, index_batch, mask_batch, mask_batch_2channels
+
+def get_image_list1219(train_dir, mask_dir):
+    train_list = get_all_files(train_dir)
+    mask_list = get_all_files(mask_dir)
+    print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
+    print("训练目录%s, 文件个数%d" % (mask_dir, len(mask_list)))
+
+    temp = np.array([train_list, mask_list])
+    temp = temp.transpose()
+    np.random.shuffle(temp)
+
+    train_list = list(temp[:, 0])
+    #sparse_list = list(temp[:, 1])
+    mask_list = list(temp[:, 1])
+
+    return [train_list, mask_list]
+
+
+def get_batch_1219(file_list, batch_size, capacity):
+    image_size = 224
+
+    # 生成队列
+    filename_queue = tf.train.slice_input_producer(file_list, shuffle=False)
+
+    # 彩色图片处理
+    train_image = tf.read_file(filename_queue[0])
+    train_image = tf.image.decode_jpeg(train_image, channels=3)
+    #train_image = tf.image.decode_bmp(train_image)
+    train_image = tf.image.resize_images(train_image, [image_size, image_size])
+    train_image = tf.cast(train_image, tf.float64) / 255.0     # 转LAB空间需要float64
+    train_image = rgb_to_lab(train_image)
+    train_image = tf.cast(train_image, tf.float32)      # 神经网络需要float32
+    #l_color = train_image[:, :, 0] / 100.0       # l范围[0, 100]
+    l_color = train_image[:, :, 0]
+    l_color = tf.reshape(l_color, [image_size, image_size, 1])
+    #ab_color = (train_image[:, :, 1:] + 128) / 255.0     # ab范围[-128, 127]
+    ab_color = train_image[:, :, 1:]
+    train_image = tf.concat([l_color, ab_color], 2)
+
+    #mask_batch
+    train_mask = tf.read_file(filename_queue[1])
+    train_mask = tf.image.decode_bmp(train_mask, channels = 3)
+    train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
+    train_mask = tf.cast(train_mask, tf.float32) / 255.0
+    train_mask_2channels = train_mask[:, :, 0:2]
+    train_mask = train_mask[:, :, 0]
+    train_mask = tf.reshape(train_mask, [image_size, image_size, 1])
+
+    # 获取batch
+    l_batch, ab_bacth, mask_batch, mask_batch_2channels =\
+        tf.train.shuffle_batch([l_color, ab_color, train_mask, train_mask_2channels],
+                               batch_size=batch_size,
+                               capacity=capacity,
+                               min_after_dequeue=500,
+                               num_threads=64)
+
+    return l_batch, ab_bacth, mask_batch, mask_batch_2channels
