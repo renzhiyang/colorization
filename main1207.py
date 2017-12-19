@@ -18,9 +18,9 @@ MAX_STEP = 150000
 
 
 def run_training():
-    train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
+    train_dir = "F:\\Project_Yang\\Database\\database_new\\ColorMap_all"
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
-    index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
+    index_dir = "F:\\Project_Yang\\Database\\database_new\\ColorMap_all"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1218"
     result_dir = "results/1218/"
