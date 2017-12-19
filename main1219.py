@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 10
+BATCH_SIZE = 5
 CAPACITY = 1000     # 队列容量
 MAX_STEP = 150000
 
@@ -18,7 +18,7 @@ MAX_STEP = 150000
 
 
 def run_training():
-    train_dir = "F:\\Project_Yang\\Database\\database_new\\ColorMap_all"
+    train_dir = "G:\\ImageNet\\colorImages"
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     #index_dir = "F:\\Project_Yang\\Database\\database_new\\ColorMap_all"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
@@ -34,9 +34,7 @@ def run_training():
     #do '+ - * /' before normalization
     l_batch = l_batch / 100
     ab_batch = (ab_batch + 128) / 255
-    index_ab_batch = (index_ab_batch + 128) / 255
     sparse_ab_batch = (sparse_ab_batch + 128) / 255
-    replace_image = (replace_image + 128) / 255
 
     #concat images
     #input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
@@ -52,7 +50,7 @@ def run_training():
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
     train_loss = model.gray_colorization_loss(out_ab_batch, ab_batch)
-    train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
+    train_rmse, train_psnr = model.get_PSNR(out_ab_batch, ab_batch)
     train_op = model.training(train_loss, global_step)
 
     l_batch = tf.cast(l_batch, tf.float64)
@@ -88,40 +86,30 @@ def run_training():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 2000 == 0:
-                l, ab, ab_index, ab_out = sess.run(
-                    [l_batch, ab_batch, index_ab_batch, out_ab_batch])
+                l, ab, ab_out = sess.run(
+                    [l_batch, ab_batch, out_ab_batch])
                 l = l[0]
                 ab = ab[0]
-                ab_index = ab_index[0]
                 ab_out = ab_out[0]
 
                 l = l * 100
                 ab = ab * 255 - 128
                 ab_out = ab_out * 255 - 128
-                ab_index = ab_index * 255 -128
-
 
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
                 img_out = np.concatenate([l, ab_out], 2)
                 img_out = color.lab2rgb(img_out)
-                img_index = np.concatenate([l, ab_index], 2)
-                img_index = color.lab2rgb(img_index)
 
-                plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(3, 4, 4), plt.imshow(img_in)
+                plt.subplot(2, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(2, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(2, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(2, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(3, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(3, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(3, 4, 8), plt.imshow(img_out)
-
-                plt.subplot(3, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(3, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(3, 4, 12), plt.imshow(img_index)
+                plt.subplot(2, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(2, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(2, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(2, 4, 8), plt.imshow(img_out)
                 plt.savefig(result_dir + str(step) + "_image.png")
                 plt.show()
 
@@ -140,19 +128,12 @@ def run_training():
                 plt.ylabel('b')
                 plt.title('output images')
 
-                axes3 = plt.subplot(223)
-                axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', s=8)
-                plt.xlabel('a')
-                plt.ylabel('b')
-                plt.title('index images')
-
-                axes4 = plt.subplot(224)
+                axes4 = plt.subplot(223)
                 part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
                 part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
-                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                axes4.legend((part1, part2), ('input', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
