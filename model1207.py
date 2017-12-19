@@ -198,6 +198,13 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels, sparse_batch, in
         tf.summary.scalar("whole_loss", loss)
         return loss
 
+def gray_colorization_loss(output_batch, ab_batch):
+    with tf.name_scope('whole_loss') as scope:
+        sobeled_loss = sobeled_losses(output_batch, ab_batch)
+        index_loss = L1_loss(output_batch, ab_batch, name = "index_loss")
+        loss = index_loss + sobeled_loss
+        tf.summary.scalar("whole_loss", loss)
+        return loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     b = 8
