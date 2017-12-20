@@ -52,9 +52,6 @@ def get_all_files(file_path):
     filename_list = []
 
     for item in os.listdir(file_path):
-        if len(filename_list) >= 152064:
-            break
-
         path = file_path + '\\' + item
         if os.path.isdir(path):     # 如果是文件夹
             filename_list.extend(get_all_files(path))
