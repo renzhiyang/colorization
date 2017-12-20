@@ -250,6 +250,7 @@ def get_batch_1219(file_list, batch_size, capacity):
 
     # 彩色图片处理
     train_image = tf.read_file(filename_queue[0])
+    print(filename_queue[0])
     train_image = tf.image.decode_jpeg(train_image, channels=3)
     #train_image = tf.image.decode_bmp(train_image)
     train_image = tf.image.resize_images(train_image, [image_size, image_size])
@@ -265,6 +266,7 @@ def get_batch_1219(file_list, batch_size, capacity):
 
     #mask_batch
     train_mask = tf.read_file(filename_queue[1])
+    print(filename_queue[1])
     train_mask = tf.image.decode_bmp(train_mask, channels = 3)
     train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
     train_mask = tf.cast(train_mask, tf.float32) / 255.0
