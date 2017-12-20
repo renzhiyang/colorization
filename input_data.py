@@ -273,7 +273,6 @@ def get_batch_1219(file_list, batch_size, capacity):
     train_mask_2channels = train_mask[:, :, 0:2]
     train_mask = train_mask[:, :, 0]
     train_mask = tf.reshape(train_mask, [image_size, image_size, 1])
-
     # 获取batch
     l_batch, ab_bacth, mask_batch, mask_batch_2channels =\
         tf.train.shuffle_batch([l_color, ab_color, train_mask, train_mask_2channels],
