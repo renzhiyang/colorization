@@ -52,7 +52,7 @@ def get_all_files(file_path):
     filename_list = []
 
     for item in os.listdir(file_path):
-        if len(filename_list) >= 100602:
+        if len(filename_list) >= 152064:
             break
 
         path = file_path + '\\' + item
