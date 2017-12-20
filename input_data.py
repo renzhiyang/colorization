@@ -252,6 +252,7 @@ def get_batch_1219(file_list, batch_size, capacity):
     train_image = tf.read_file(filename_queue[0])
     print(filename_queue[0])
     train_image = tf.image.decode_jpeg(train_image, channels=3)
+    print(train_image)
     #train_image = tf.image.decode_bmp(train_image)
     train_image = tf.image.resize_images(train_image, [image_size, image_size])
     train_image = tf.cast(train_image, tf.float64) / 255.0     # 转LAB空间需要float64
@@ -268,6 +269,7 @@ def get_batch_1219(file_list, batch_size, capacity):
     train_mask = tf.read_file(filename_queue[1])
     print(filename_queue[1])
     train_mask = tf.image.decode_bmp(train_mask, channels = 3)
+    print(train_mask)
     train_mask = tf.image.resize_images(train_mask, [image_size, image_size])
     train_mask = tf.cast(train_mask, tf.float32) / 255.0
     train_mask_2channels = train_mask[:, :, 0:2]
