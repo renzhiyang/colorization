@@ -50,7 +50,6 @@ def rgb_to_lab(image):
 # 递归遍历所有文件
 def get_all_files(file_path):
     filename_list = []
-
     for item in os.listdir(file_path):
         path = file_path + '\\' + item
         if os.path.isdir(path):     # 如果是文件夹
