@@ -190,7 +190,7 @@ def whole_loss1214(output_batch, index_batch, mask_batch_2channels, sparse_batch
 def whole_loss(output_batch, index_batch, mask_batch_2channels):
     with tf.name_scope('whole_loss') as scope:
         #sobel loss
-        sobel_loss = sobeled_losses(output_batch, index_batch) * 1e4
+        sobel_loss = sobeled_losses(output_batch, index_batch)
 
         #index loss
         index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
@@ -198,7 +198,7 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels):
         #local points loss
         sparse_points = index_batch * mask_batch_2channels
         out_points = output_batch * mask_batch_2channels
-        local_points_loss = L1_loss(sparse_points, out_points, name = "local_points_loss")
+        local_points_loss = L1_loss(sparse_points, out_points, name = "local_points_loss") * 1e4
 
         whole_loss = sobel_loss + local_points_loss
         tf.summary.scalar("whole_loss", whole_loss)
