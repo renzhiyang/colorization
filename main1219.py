@@ -18,7 +18,7 @@ MAX_STEP = 150000
 
 
 def run_training():
-    train_dir = "G:\\ImageNet\\colorImages"
+    train_dir = "G:\\ImageNet\\trainImages"
     #sparse_dir = "F:\\Project_Yang\\Database\\database_new\\sparse_image"
     #index_dir = "F:\\Project_Yang\\Database\\database_new\\ColorMap_all"
     mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image"
