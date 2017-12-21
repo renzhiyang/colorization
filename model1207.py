@@ -200,7 +200,7 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels):
         out_points = output_batch * mask_batch_2channels
         local_points_loss = L1_loss(sparse_points, out_points, name = "local_points_loss")
 
-        whole_loss = sobeled_loss + local_points_loss
+        whole_loss = sobel_loss + local_points_loss
         tf.summary.scalar("whole_loss", whole_loss)
         return whole_loss, sobel_loss, local_points_loss
 
