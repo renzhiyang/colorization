@@ -221,7 +221,7 @@ def get_PSNR(out_ab_batch, index_ab_batch):
     #tf.summary.scalar('RMSE', RMSE)
     #tf.summary.scalar('PSNR', PSNR)
 
-    MSE = tf.reduce_mean(tf.square(out_ab_batch, index_ab_batch))
+    MSE = tf.reduce_mean(tf.square(out_ab_batch - index_ab_batch))
     PSNR = 10 * tf.log(1 / MSE) / np.log(10)
     tf.summary.scalar('MSE', MSE)
     tf.summary.scalar('PSNR', PSNR)
