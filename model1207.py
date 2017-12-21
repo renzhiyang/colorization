@@ -193,16 +193,17 @@ def whole_loss(output_batch, index_batch, mask_batch_2channels):
         sobel_loss = sobeled_losses(output_batch, index_batch)
 
         #index loss
-        index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
+        #index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
+        index_loss = tf.losses.huber_loss(output_batch, index_batch, delta = 0.5)
 
         #local points loss
         sparse_points = index_batch * mask_batch_2channels
         out_points = output_batch * mask_batch_2channels
         local_points_loss = L1_loss(sparse_points, out_points, name = "local_points_loss") * 1e4
 
-        whole_loss = sobel_loss + local_points_loss
+        whole_loss = index_loss + sobel_loss + local_points_loss
         tf.summary.scalar("whole_loss", whole_loss)
-        return whole_loss, sobel_loss, local_points_loss
+        return whole_loss, index_loss, sobel_loss, local_points_loss
 
 def gray_colorization_loss(output_batch, ab_batch):
     with tf.name_scope('whole_loss') as scope:
@@ -213,13 +214,18 @@ def gray_colorization_loss(output_batch, ab_batch):
         return loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
-    b = 8
-    MAX = 2 ** b - 1
-    RMSE = tf.sqrt(tf.reduce_mean(tf.squared_difference(out_ab_batch, index_ab_batch)))
-    PSNR = 10 * log10( MAX / RMSE)
-    tf.summary.scalar('RMSE', RMSE)
+    #b = 8
+    #MAX = 2 ** b - 1
+    #RMSE = tf.sqrt(tf.reduce_mean(tf.squared_difference(out_ab_batch, index_ab_batch)))
+    #PSNR = 10 * log10( MAX / RMSE)
+    #tf.summary.scalar('RMSE', RMSE)
+    #tf.summary.scalar('PSNR', PSNR)
+
+    MSE = tf.reduce_mean(tf.square(out_ab_batch, index_ab_batch))
+    PSNR = 10 * tf.log(1 / MSE) / np.log(10)
+    tf.summary.scalar('MSE', MSE)
     tf.summary.scalar('PSNR', PSNR)
-    return RMSE, PSNR
+    return MSE, PSNR
 
 # 训练操作
 def training(loss, global_step):
