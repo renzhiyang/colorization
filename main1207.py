@@ -41,19 +41,19 @@ def run_training():
     replace_image = (replace_image + 128) / 255
 
     #concat images
-    #input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
-    #mask_batch = mask_batch_2channels[:, :, :, 0]
-    #mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
+    input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
+    mask_batch = mask_batch_2channels[:, :, :, 0]
+    mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
     #gray image input
-    gray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    #ray_input = tf.concat([l_batch, sparse_ab_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.built_network1212(gray_input, mask_batch)
+    out_ab_batch = model.built_network1212(input_batch, mask_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = model.gray_colorization_loss(out_ab_batch, index_ab_batch)
+    train_loss, sobel_loss, local_points_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
@@ -73,7 +73,7 @@ def run_training():
             if coord.should_stop():
                 break
 
-            _, tra_loss = sess.run([train_op, train_loss])
+            _, tra_loss, sobel, local_points = sess.run([train_op, train_loss, sobel_loss, local_points_loss])
             tra_rmse, tra_psnr = sess.run([train_rmse, train_psnr])
 
             if isnan(tra_loss):
@@ -84,7 +84,7 @@ def run_training():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,    loss: %g,     RMSE: %g,     PSNR: %g" % (step, tra_loss, tra_rmse, tra_psnr))
+                print("Step: %d,    loss: %g,    sobel: %g,  local_points: %g   RMSE: %g,     PSNR: %g" % (step, tra_loss, sobel, local_points, tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
