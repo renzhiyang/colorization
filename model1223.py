@@ -165,46 +165,20 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
         return mask_loss
 
 
+#loss function
+def whole_loss(output_ab_batch, image_ab_batch, theme_ab_batch):
+    with tf.name_scope('loss') as scope:
+        #image_ab_loss
+        image_ab_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
 
-#总的loss，供外部调用
-def whole_loss1214(output_batch, index_batch, mask_batch_2channels, sparse_batch, input_batch):
-    with tf.name_scope('whole_loss') as scope:
-        sobeled_loss = sobeled_losses(output_batch, index_batch)
-        #mask_loss = mask_losses(output_batch, mask_batch_2channels, sparse_batch)
-        index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
-        ori_loss = L1_loss(output_batch, input_batch, name = "ori_loss")
-        image_loss = 0.9 * index_loss + 0.1 * ori_loss
-        loss = image_loss + sobeled_loss
-        tf.summary.scalar("whole_loss", loss)
-        tf.summary.scalar("Image_loss", loss)
-        return loss
+        #theme_ab_loss
+        theme_ab_loss = tf.losses.huber_loss(output_ab_batch, theme_ab_batch, delta = 0.5)
 
-#总的loss，供外部调用
-def whole_loss(output_batch, index_batch, mask_batch_2channels):
-    with tf.name_scope('whole_loss') as scope:
-        #sobel loss
-        sobel_loss = sobeled_losses(output_batch, index_batch)
-
-        #index loss
-        #index_loss = L1_loss(output_batch, index_batch, name = "index_loss")
-        index_loss = tf.losses.huber_loss(output_batch, index_batch, delta = 0.5)
-
-        #local points loss
-        sparse_points = index_batch * mask_batch_2channels
-        out_points = output_batch * mask_batch_2channels
-        local_points_loss = L1_loss(sparse_points, out_points, name = "local_points_loss") * 1e4
-
-        whole_loss = index_loss + sobel_loss + local_points_loss
+        whole_loss = 0.3 * image_ab_loss + 0.7 * theme_ab_loss
         tf.summary.scalar("whole_loss", whole_loss)
-        return whole_loss, index_loss, sobel_loss, local_points_loss
-
-def gray_colorization_loss(output_batch, ab_batch):
-    with tf.name_scope('whole_loss') as scope:
-        sobeled_loss = sobeled_losses(output_batch, ab_batch)
-        index_loss = L1_loss(output_batch, ab_batch, name = "index_loss")
-        loss = index_loss + sobeled_loss
-        tf.summary.scalar("whole_loss", loss)
-        return loss
+        tf.summary.scalar("image_ab_loss", image_ab_loss)
+        tf.summary.scalar("theme_ab_loss", theme_ab_loss)
+        return whole_loss, image_ab_loss, theme_ab_loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
