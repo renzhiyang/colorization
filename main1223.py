@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import input_data
-import model1207 as model
+import model1223 as model
 from math import isnan
 from matplotlib import pyplot as plt
 import skimage.color as color
@@ -13,42 +13,50 @@ import skimage.color as color
 BATCH_SIZE = 10
 CAPACITY = 1000     # 队列容量
 MAX_STEP = 150000
+IMAGE_SIZE = 224
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
-#local input
+#theme input
 def run_training():
     train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
-    index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
-    mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image_oldSets"
+    image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
+    theme_index_dir = "F:\\Project_Yang\\Database\\database_new\\theme_index"
+    theme_dir = "F:\\Project_Yang\\Database\\database_new\\theme_image"
+    theme_mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image_oldSets"
+
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1221"
     result_dir = "results/1221/"
 
     # 获取输入
-    image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
-    l_batch, ab_batch, index_ab_batch, mask_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
+    image_list = input_data.get_themeInput_list(train_dir, image_index_dir, theme_dir, theme_index_dir, theme_mask_dir)
+    train_batch, image_index_batch, theme_batch, theme_index_batch, theme_mask_batch = \
+        input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    sparse_ab_batch = index_ab_batch * mask_batch_2channels
-    #replace images
-    replace_image = (ab_batch - ab_batch * mask_batch_2channels) + sparse_ab_batch
+    #rgb_to_lab
+    train_lab_batch = input_data.rgb_to_lab(train_batch)
+    imageIndex_lab_batch = input_data.rgb_to_lab(image_index_batch)
+    theme_lab_batch = input_data.rgb_to_lab(theme_batch)
+    themeIndex_lab_batch = input_data.rgb_to_lab(theme_index_batch)
 
-    #do '+ - * /' before normalization
-    l_batch = l_batch / 100
-    ab_batch = (ab_batch + 128) / 255
-    index_ab_batch = (index_ab_batch + 128) / 255
-    sparse_ab_batch = (sparse_ab_batch + 128) / 255
-    replace_image = (replace_image + 128) / 255
+    #do + - * / before normalization
 
-    #concat images
-    input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
-    mask_batch = mask_batch_2channels[:, :, :, 0]
-    mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
 
-    #gray image input
-    #ray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    #normalization
+    image_l_batch = tf.reshape(train_lab_batch[:, :, :, 0] / 100, [BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, 1])
+    image_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
+    imageIndex_ab_batch = (imageIndex_lab_batch[:, :, :, 1:] + 128) / 255
+    theme_ab_batch = (theme_lab_batch[:, :, :, 1:] + 128) / 255
+    themeIndex_ab_batch = (themeIndex_lab_batch[:, :, :, 1:] + 128) / 255
+
+    #input batches
+    theme_input = tf.concat([theme_ab_batch, theme_mask_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.built_network1212(input_batch, mask_batch)
+    out_ab_batch = model.built_network(image_ab_batch, theme_input)
+
+    #################################################################################################################
+
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
