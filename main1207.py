@@ -16,7 +16,7 @@ MAX_STEP = 150000
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
-
+#local input
 def run_training():
     train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
     index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
