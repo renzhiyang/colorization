@@ -17,13 +17,10 @@ def build_ResnetBlock(inputres, dim, name = "resnet"):
         return tf.nn.relu(out_res + inputres)
 
 
-def built_network(replace_ab_batch, mask_batch):
-    with tf.name_scope("network") as scope:
+def encode(input_batch):
+    with tf.name_scope("encode") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*3
-        input_batch = tf.concat([replace_ab_batch, mask_batch], 3)
-
         # conv1_1 = 224*224*64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
         # conv1_2 = 224*224*64
@@ -38,94 +35,90 @@ def built_network(replace_ab_batch, mask_batch):
         conv3_2 = general_conv2d(conv3_1, filters * 4, kernel_size, 1, name="conv3_2")
         # conv3_3 = 56*56*256
         conv3_3 = general_conv2d(conv3_2, filters * 4, kernel_size, 1, name="conv3_3")
+        return conv1_2, conv2_2, conv3_3
 
-        # middle level 50*28*28*512 , 建立四个resnet的block
-        conv4 = general_conv2d(conv3_3, filters * 8, kernel_size, 2, name="conv4")
-        conv4_1 = build_ResnetBlock(conv4, filters * 8, name="conv4_1")
-        conv4_2 = build_ResnetBlock(conv4_1, filters * 8, name="conv4_2")
-        conv4_3 = build_ResnetBlock(conv4_2, filters * 8, name="conv4_3")
-        conv4_4 = build_ResnetBlock(conv4_3, filters * 8, name="conv4_4")
-
-
-        # conv5_1 = 56*56*256
-        #coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv5_1 = general_deconv2d(conv4_4, filters * 4, kernel_size, 2, name="conv5_1")
-        conv5_1 = tf.concat([conv5_1, conv3_3], 3)
-        # conv5_2 = 56*56*256
-        conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
-        # conv5_3 = 56*56*256
-        conv5_3 = general_conv2d(conv5_2, filters * 4, kernel_size, 1, name="conv5_3")
-        # conv6_1 = 112*112*128
-        #coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv6_1 = general_deconv2d(conv5_3, filters * 2, kernel_size, 2, name="conv6_1")
-        conv6_1 = tf.concat([conv6_1, conv2_2], 3)
-        # conv6_2 = 112*112*128
-        conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
-        # conv7_1 = 224*224*128
-        #coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv7_1 = general_deconv2d(conv6_2, filters * 2, kernel_size, 2, name="conv7_1")
-        conv7_1 = tf.concat([conv7_1, conv1_2], 3)
-        # conv7_2 = 224*224*128
-        conv7_2 = general_conv2d(conv7_1, filters * 2, kernel_size, 1, name="conv7_2")
-        conv7_3 = general_conv2d(conv7_2, filters * 2, kernel_size, 1, name="conv7_3")
-        # conv8_1 = 224*224*2
-        conv8_1 = general_conv2d(conv7_3, 2, 1, 1, name="conv8_1")
-
-        return tf.nn.tanh(conv8_1, name="output")
-
-def built_network1212(input_ab_batch, mask_batch):
-    with tf.name_scope("network") as scope:
+def middle_layer(input_batch):
+    with tf.name_scope("middle_layer") as scope:
         kernel_size = 3
         filters = 64
-        # input_batch = 224*224*3
-        input_batch = tf.concat([input_ab_batch, mask_batch], 3)
+        conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 2, name="conv1")
+        conv2 = build_ResnetBlock(conv4, filters * 8, name="conv2")
+        conv3 = build_ResnetBlock(conv4_1, filters * 8, name="conv2")
+        conv4 = build_ResnetBlock(conv4_2, filters * 8, name="conv3")
+        conv5 = build_ResnetBlock(conv4_3, filters * 8, name="conv4")
+        return conv5
 
-        # conv1_1 = 224*224*64
-        conv1_1 = general_conv2d(input_batch, filters, kernel_size, 1, name="conv1_1")
-        # conv1_2 = 224*224*64
-        conv1_2 = general_conv2d(conv1_1, filters, kernel_size, 1, name="conv1_2")
-        # conv2_1 = 112*112*128
-        conv2_1 = general_conv2d(conv1_2, filters * 2, kernel_size, 2, name="conv2_1")
-        # conv2_2 = 112*112*128
-        conv2_2 = general_conv2d(conv2_1, filters * 2, kernel_size, 1, name="conv2_2")
-        # conv3_1 = 56*56*256
-        conv3_1 = general_conv2d(conv2_2, filters * 4, kernel_size, 2, name="conv3_1")
-        # conv3_2 = 56*56*256
-        conv3_2 = general_conv2d(conv3_1, filters * 4, kernel_size, 1, name="conv3_2")
-        # conv3_3 = 56*56*256
-        conv3_3 = general_conv2d(conv3_2, filters * 4, kernel_size, 1, name="conv3_3")
-
-        # middle level 50*28*28*512 , 建立四个resnet的block
-        conv4 = general_conv2d(conv3_3, filters * 8, kernel_size, 2, name="conv4")
-        conv4_1 = build_ResnetBlock(conv4, filters * 8, name="conv4_1")
-        conv4_2 = build_ResnetBlock(conv4_1, filters * 8, name="conv4_2")
-        conv4_3 = build_ResnetBlock(conv4_2, filters * 8, name="conv4_3")
-        conv4_4 = build_ResnetBlock(conv4_3, filters * 8, name="conv4_4")
-
-
+def decode(input_batch, layer1, layer2, layer3):
+    with tf.name_scope("decode") as scope:
+        kernel_size = 3
+        filters = 64
         # conv5_1 = 56*56*256
-        conv5_1 = upsample_layer(conv4_4, 2, scope_name = "conv5_1")
-        conv5_1 = tf.concat([conv5_1, conv3_3], 3)
+        conv5_1 = upsample_layer(input_batch, 2, scope_name="conv5_1")
+        conv5_1 = tf.concat([conv5_1, layer3], 3)
         # conv5_2 = 56*56*256
         conv5_2 = general_conv2d(conv5_1, filters * 4, kernel_size, 1, name="conv5_2")
         # conv5_3 = 56*56*256
         conv5_3 = general_conv2d(conv5_2, filters * 4, kernel_size, 1, name="conv5_3")
         # conv6_1 = 112*112*128
-        conv6_1 = upsample_layer(conv5_3, 2, scope_name = "conv6_1")
-        conv6_1 = tf.concat([conv6_1, conv2_2], 3)
+        conv6_1 = upsample_layer(conv5_3, 2, scope_name="conv6_1")
+        conv6_1 = tf.concat([conv6_1, layer2], 3)
         # conv6_2 = 112*112*128
         conv6_2 = general_conv2d(conv6_1, filters * 2, kernel_size, 1, name="conv6_2")
         # conv7_1 = 224*224*128
-        #coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         conv7_1 = upsample_layer(conv6_2, 2, scope_name="conv7_1")
-        conv7_1 = tf.concat([conv7_1, conv1_2], 3)
+        conv7_1 = tf.concat([conv7_1, layer1], 3)
         # conv7_2 = 224*224*128
         conv7_2 = general_conv2d(conv7_1, filters * 2, kernel_size, 1, name="conv7_2")
         conv7_3 = general_conv2d(conv7_2, filters * 2, kernel_size, 1, name="conv7_3")
         # conv8_1 = 224*224*2
         conv8_1 = general_conv2d(conv7_3, 2, 1, 1, name="conv8_1")
-
         return tf.nn.tanh(conv8_1, name="output")
+
+def theme_features_network(theme_batch, num_outputs):
+    with tf.name_scope("theme_features_network") as scope:
+        batch_size = theme_batch.get_shape()[0].value
+        theme_input = tf.reshape(theme_batch, [batch_size, -1])
+
+        h_fc1 = layers.fully_connected(inputs=theme_input,
+                                       num_outputs=512,
+                                       scope=scope + '/fc1')
+        h_fc2 = layers.fully_connected(inputs=h_fc1,
+                                       num_outputs=512,
+                                       scope=scope + '/fc2')
+
+        h_fc3 = layers.fully_connected(inputs=h_fc2,
+                                       num_outputs=num_outputs,
+                                       scope=scope + '/fc3')
+
+        return h_fc3
+
+def fusion_layer(source_feature, target_feature):
+    with tf.name_scope("fusion_layer") as scope:
+        batch_size = source_feature.shape[0].value
+        feature_channels = source_feature.shape[-1].value
+
+        target_feature = tf.reshape(target_feature, [batch_size, 1, 1, feature_channels])
+
+        coef = tf.get_variable(scope + 'coef',
+                               shape=[1],
+                               dtype=tf.float32,
+                               initializer=tf.constant_initializer(0.5))
+        fusion_feature = source_feature + (1 - coef) * target_feature
+        print([scope, fusion_feature])
+
+        return fusion_feature
+
+def built_network(input_ab_batch, theme_input):
+    with tf.name_scope("network") as scope:
+        kernel_size = 3
+        filters = 64
+        # input_batch = 224*224*3
+        layer1, layer2, layer3 = encode(input_ab_batch)
+        middle_output = middle_layer(layer3)
+        theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
+        fusion_out = fusion_layer(middle_output, theme_output)
+        out_ab_batch = decode(fusion_out, layer1, layer2, layer3)
+        return out_ab_batch
 
 
 
