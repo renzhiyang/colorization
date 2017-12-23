@@ -281,7 +281,7 @@ def get_batch_1219(file_list, batch_size, capacity):
     return l_batch, ab_bacth, mask_batch, mask_batch_2channels
 
 
-def get_themeInput_list(train_dir, image_index_dir, theme_dir, theme_index_dir, theme_mask_dir):
+def get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir):
     train_list = get_all_files(train_dir)
     theme_list = get_all_files(theme_dir)
     theme_index_list = get_all_files(theme_index_dir)
