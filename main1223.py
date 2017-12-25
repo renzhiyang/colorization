@@ -36,9 +36,9 @@ def run_training():
     train_batch = tf.cast(train_batch, tf.float64)
     theme_batch = tf.cast(theme_batch, tf.float64)
     theme_index_batch = tf.cast(theme_index_batch, tf.float64)
-    train_lab_batch = input_data.rgb_to_lab(train_batch)
-    theme_lab_batch = input_data.rgb_to_lab(theme_batch)
-    themeIndex_lab_batch = input_data.rgb_to_lab(theme_index_batch)
+    train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
+    theme_lab_batch = tf.cast(input_data.rgb_to_lab(theme_batch), tf.float32)
+    themeIndex_lab_batch = tf.cast(input_data.rgb_to_lab(theme_index_batch), tf.float32)
 
     #do + - * / before normalization
 
@@ -62,8 +62,6 @@ def run_training():
     #train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-    l_batch = tf.cast(l_batch, tf.float64)
-    #lab_batch = tf.cast(lab_batch, tf.float64)
 
     summary_op = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
@@ -96,7 +94,6 @@ def run_training():
             if step % 2000 == 0:
                 l, ab, ab_theme, ab_out = sess.run(
                     [image_l_batch, image_ab_batch, themeIndex_ab_batch, out_ab_batch])
-
                 l = l[0] * 100
                 ab = ab[0] * 255 - 128
                 ab_theme = ab_theme[0] * 255 - 128
