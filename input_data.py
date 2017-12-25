@@ -322,7 +322,7 @@ def get_themeObj_batch(file_list, batch_size, capacity):
 
     #theme list
     theme = tf.read_file(filename_queue[1])
-    theme = tf.image.decode_jpeg(theme, channels=3)
+    theme = tf.image.decode_bmp(theme, channels=3)
     theme = tf.image.resize_images(theme, [1, 7])
     theme = tf.cast(theme, tf.float32) / 255
 
