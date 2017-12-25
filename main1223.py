@@ -55,6 +55,8 @@ def run_training():
     #concat image_ab and sparse_ab as input
     out_ab_batch = model.built_network(image_ab_batch, theme_input)
 
+    image_l_batch = tf.cast(image_l_batch, tf.float64)
+
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -142,7 +144,7 @@ def run_training():
                 axes3.scatter(ab_theme[:, :, 0], ab_theme[:, :, 1], alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                plt.title('index images')
+                plt.title('five color images')
 
                 axes4 = plt.subplot(224)
                 part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
@@ -150,7 +152,7 @@ def run_training():
                 part3 = axes4.scatter(ab_theme[:, :, 0], ab_theme[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                axes4.legend((part1, part2, part3), ('input', 'output', 'five color'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
