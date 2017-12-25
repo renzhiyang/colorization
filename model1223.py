@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.contrib import layers
 import numpy as np
 import os
 import random
@@ -42,10 +43,10 @@ def middle_layer(input_batch):
         kernel_size = 3
         filters = 64
         conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 2, name="conv1")
-        conv2 = build_ResnetBlock(conv4, filters * 8, name="conv2")
-        conv3 = build_ResnetBlock(conv4_1, filters * 8, name="conv2")
-        conv4 = build_ResnetBlock(conv4_2, filters * 8, name="conv3")
-        conv5 = build_ResnetBlock(conv4_3, filters * 8, name="conv4")
+        conv2 = build_ResnetBlock(conv1, filters * 8, name="conv2")
+        conv3 = build_ResnetBlock(conv2, filters * 8, name="conv3")
+        conv4 = build_ResnetBlock(conv3, filters * 8, name="conv4")
+        conv5 = build_ResnetBlock(conv4, filters * 8, name="conv5")
         return conv5
 
 def decode(input_batch, layer1, layer2, layer3):
