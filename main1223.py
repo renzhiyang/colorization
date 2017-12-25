@@ -19,21 +19,23 @@ IMAGE_SIZE = 224
 
 #theme input
 def run_training():
-    train_dir = "G:\\Database\\ColorImages\\badlands"
+    train_dir = "G:\\Database\\ColorImages\\abbey"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
-    theme_index_dir = "G:\\Database\\ColorMap5\\badlands"
-    theme_dir = "G:\\Database\\ColorTheme5\\badlands"
-    theme_mask_dir = "G:\\Database\\ColorThemeMask5\\badlands"
+    theme_index_dir = "G:\\Database\\ColorMap5\\abbey"
+    theme_dir = "G:\\Database\\ColorTheme5\\abbey"
+    theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
 
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1223"
     result_dir = "results/1223/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir)
-    train_batch, image_index_batch, theme_batch, theme_index_batch, theme_mask_batch = \
-        input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
+    train_batch, theme_batch, theme_index_batch, theme_mask_batch = input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #rgb_to_lab
+    train_batch = tf.cast(train_batch, tf.float64)
+    theme_batch = tf.cast(theme_batch, tf.float64)
+    theme_index_batch = tf.cast(theme_index_batch, tf.float64)
     train_lab_batch = input_data.rgb_to_lab(train_batch)
     theme_lab_batch = input_data.rgb_to_lab(theme_batch)
     themeIndex_lab_batch = input_data.rgb_to_lab(theme_index_batch)
