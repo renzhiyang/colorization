@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColorTheme5\\abbey"
     theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1223"
-    result_dir = "results/1223/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1226"
+    result_dir = "results/1226/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir)
