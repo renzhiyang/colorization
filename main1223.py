@@ -25,7 +25,7 @@ def run_training():
     theme_dir = "G:\\Database\\ColorTheme5\\abbey"
     theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1226"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1227"
     result_dir = "results/1226/"
 
     # 获取输入
