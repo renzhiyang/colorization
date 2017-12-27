@@ -33,7 +33,7 @@ def run_training():
     train_batch, theme_batch, theme_index_batch, theme_mask_batch = input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #rgb_to_lab
-    #train_batch = tf.cast(train_batch, tf.float64)
+    train_batch = tf.cast(train_batch, tf.float64)
     theme_batch = tf.cast(theme_batch, tf.float64)
     theme_index_batch = tf.cast(theme_index_batch, tf.float64)
     train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
