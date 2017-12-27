@@ -38,7 +38,7 @@ def run_training():
     theme_index_batch = tf.cast(theme_index_batch, tf.float64)
     train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
     theme_lab_batch = tf.cast(input_data.rgb_to_lab(theme_batch), tf.float32)
-    themeIndex_lab_batch = tf.cast(input_data.rgb_to_lab(theme_index_batch), tf.float32)
+    #themeIndex_lab_batch = tf.cast(input_data.rgb_to_lab(theme_index_batch), tf.float32)
 
     #do + - * / before normalization
 
