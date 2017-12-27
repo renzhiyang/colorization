@@ -55,7 +55,6 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
-
     return filename_list
 
 
@@ -281,7 +280,7 @@ def get_batch_1219(file_list, batch_size, capacity):
     return l_batch, ab_bacth, mask_batch, mask_batch_2channels
 
 
-def get_themeInput_list(train_dir, image_index_dir, theme_dir, theme_index_dir, theme_mask_dir):
+def get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir):
     train_list = get_all_files(train_dir)
     theme_list = get_all_files(theme_dir)
     theme_index_list = get_all_files(theme_index_dir)
@@ -290,7 +289,7 @@ def get_themeInput_list(train_dir, image_index_dir, theme_dir, theme_index_dir, 
     print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
     print("训练目录%s, 文件个数%d" % (theme_dir, len(theme_list)))
     print("训练目录%s, 文件个数%d" % (theme_index_dir, len(theme_index_list)))
-    print("训练目录%s, 文件个数%d" % (theme_mask_dir, len(theme_mask_dir)))
+    print("训练目录%s, 文件个数%d" % (theme_mask_dir, len(theme_mask_list)))
 
     temp = np.array([train_list, theme_list, theme_index_list, theme_mask_list])
     temp = temp.transpose()
@@ -323,7 +322,7 @@ def get_themeObj_batch(file_list, batch_size, capacity):
 
     #theme list
     theme = tf.read_file(filename_queue[1])
-    theme = tf.image.decode_jpeg(theme, channels=3)
+    theme = tf.image.decode_bmp(theme, channels=3)
     theme = tf.image.resize_images(theme, [1, 7])
     theme = tf.cast(theme, tf.float32) / 255
 

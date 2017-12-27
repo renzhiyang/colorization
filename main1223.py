@@ -19,24 +19,26 @@ IMAGE_SIZE = 224
 
 #theme input
 def run_training():
-    train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
+    train_dir = "G:\\Database\\ColorImages\\abbey"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
-    theme_index_dir = "F:\\Project_Yang\\Database\\database_new\\theme_index"
-    theme_dir = "F:\\Project_Yang\\Database\\database_new\\theme_image"
-    theme_mask_dir = "F:\\Project_Yang\\Database\\database_new\\mask_image_oldSets"
+    theme_index_dir = "G:\\Database\\ColorMap5\\abbey"
+    theme_dir = "G:\\Database\\ColorTheme5\\abbey"
+    theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1221"
-    result_dir = "results/1221/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1226"
+    result_dir = "results/1226/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir)
-    train_batch, image_index_batch, theme_batch, theme_index_batch, theme_mask_batch = \
-        input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
+    train_batch, theme_batch, theme_index_batch, theme_mask_batch = input_data.get_themeObj_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #rgb_to_lab
-    train_lab_batch = input_data.rgb_to_lab(train_batch)
-    theme_lab_batch = input_data.rgb_to_lab(theme_batch)
-    themeIndex_lab_batch = input_data.rgb_to_lab(theme_index_batch)
+    train_batch = tf.cast(train_batch, tf.float64)
+    theme_batch = tf.cast(theme_batch, tf.float64)
+    theme_index_batch = tf.cast(theme_index_batch, tf.float64)
+    train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
+    theme_lab_batch = tf.cast(input_data.rgb_to_lab(theme_batch), tf.float32)
+    themeIndex_lab_batch = tf.cast(input_data.rgb_to_lab(theme_index_batch), tf.float32)
 
     #do + - * / before normalization
 
@@ -53,6 +55,8 @@ def run_training():
     #concat image_ab and sparse_ab as input
     out_ab_batch = model.built_network(image_ab_batch, theme_input)
 
+    image_l_batch = tf.cast(image_l_batch, tf.float64)
+
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
@@ -60,8 +64,6 @@ def run_training():
     #train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-    l_batch = tf.cast(l_batch, tf.float64)
-    #lab_batch = tf.cast(lab_batch, tf.float64)
 
     summary_op = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
@@ -94,7 +96,6 @@ def run_training():
             if step % 2000 == 0:
                 l, ab, ab_theme, ab_out = sess.run(
                     [image_l_batch, image_ab_batch, themeIndex_ab_batch, out_ab_batch])
-
                 l = l[0] * 100
                 ab = ab[0] * 255 - 128
                 ab_theme = ab_theme[0] * 255 - 128
@@ -143,7 +144,7 @@ def run_training():
                 axes3.scatter(ab_theme[:, :, 0], ab_theme[:, :, 1], alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                plt.title('index images')
+                plt.title('five color images')
 
                 axes4 = plt.subplot(224)
                 part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
@@ -151,7 +152,7 @@ def run_training():
                 part3 = axes4.scatter(ab_theme[:, :, 0], ab_theme[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                axes4.legend((part1, part2, part3), ('input', 'output', 'five color'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
