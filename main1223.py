@@ -22,7 +22,7 @@ def run_training():
     train_dir = "G:\\Database\\ColorImages\\abbey"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     theme_index_dir = "G:\\Database\\ColorMap5\\abbey"
-    theme_dir = "G:\\Database\\ColorTheme5\\abbey"
+    theme_dir = "G:\\Database\\RandomColorThemeObbey"
     theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
 
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1226"
@@ -94,12 +94,13 @@ def run_training():
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 2000 == 0:
-                l, ab, ab_theme, ab_out = sess.run(
-                    [image_l_batch, image_ab_batch, themeIndex_ab_batch, out_ab_batch])
+                l, ab, ab_theme, ab_out, theme = sess.run(
+                    [image_l_batch, image_ab_batch, themeIndex_ab_batch, out_ab_batch, theme_batch])
                 l = l[0] * 100
                 ab = ab[0] * 255 - 128
                 ab_theme = ab_theme[0] * 255 - 128
                 ab_out = ab_out[0] * 255 - 128
+                theme = theme[0] * 255
 
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
@@ -108,20 +109,22 @@ def run_training():
                 img_theme = np.concatenate([l, ab_theme], 2)
                 img_theme = color.lab2rgb(img_theme)
 
-                plt.subplot(3, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(3, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(3, 4, 4), plt.imshow(img_in)
+                plt.subplot(4, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(4, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(4, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(3, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(3, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(3, 4, 8), plt.imshow(img_out)
+                plt.subplot(4, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(4, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(4, 4, 8), plt.imshow(img_out)
 
-                plt.subplot(3, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(3, 4, 10), plt.imshow(ab_theme[:, :, 0], 'gray')
-                plt.subplot(3, 4, 11), plt.imshow(ab_theme[:, :, 1], 'gray')
-                plt.subplot(3, 4, 12), plt.imshow(img_theme)
+                plt.subplot(4, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(4, 4, 10), plt.imshow(ab_theme[:, :, 0], 'gray')
+                plt.subplot(4, 4, 11), plt.imshow(ab_theme[:, :, 1], 'gray')
+                plt.subplot(4, 4, 12), plt.imshow(img_theme)
+
+                plt.subplot(4, 4, 13), plt.imshow(theme)
                 plt.savefig(result_dir + str(step) + "_image.png")
                 plt.show()
 
