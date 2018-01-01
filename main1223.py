@@ -93,7 +93,7 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
+            if step % 5000 == 0:
                 l, ab, ab_theme, ab_out, theme = sess.run(
                     [image_l_batch, image_ab_batch, themeIndex_ab_batch, out_ab_batch, theme_batch])
                 l = l[0] * 100
