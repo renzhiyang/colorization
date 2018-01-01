@@ -21,12 +21,12 @@ IMAGE_SIZE = 224
 def run_training():
     train_dir = "G:\\Database\\ColorImages"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
-    theme_index_dir = "G:\\Database\\RandomColorMap\\abbey"
-    theme_dir = "G:\\Database\\ColorThemeRandom\\abbey"
-    theme_mask_dir = "G:\\Database\\ColorThemeMask5\\abbey"
+    theme_index_dir = "G:\\Database\\RandomColorMap"
+    theme_dir = "G:\\Database\\ColorThemeRandom"
+    theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1229"
-    result_dir = "results/1229/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1811"
+    result_dir = "results/1811/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir)
