@@ -19,7 +19,7 @@ IMAGE_SIZE = 224
 
 #theme input
 def run_training():
-    train_dir = "G:\\Database\\ColorImages\\abbey"
+    train_dir = "G:\\Database\\ColorImages"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
     theme_index_dir = "G:\\Database\\RandomColorMap\\abbey"
     theme_dir = "G:\\Database\\ColorThemeRandom\\abbey"
