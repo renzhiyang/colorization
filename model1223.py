@@ -45,7 +45,7 @@ def middle_layer(input_batch):
         conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 2, name="conv1")
         conv2 = build_ResnetBlock(conv1, filters * 8, name="conv2")
         conv3 = build_ResnetBlock(conv2, filters * 8, name="conv3")
-        conv4 = build_ResnetBlock(conv3, filters * 8, name="conv4")
+        #conv4 = build_ResnetBlock(conv3, filters * 8, name="conv4")
         #conv5 = build_ResnetBlock(conv4, filters * 8, name="conv5")
         return conv4
 
