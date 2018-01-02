@@ -63,7 +63,6 @@ def run_training():
     #train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-
     summary_op = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
     saver = tf.train.Saver(max_to_keep=20)
