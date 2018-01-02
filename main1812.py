@@ -19,10 +19,10 @@ IMAGE_SIZE = 224
 
 #theme input, use 2 resnet
 def run_training():
-    train_dir = "G:\\Database\\ColorImages"
+    train_dir = "G:\\Database\\trainImages"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
-    theme_index_dir = "G:\\Database\\RandomColorMap"
-    theme_dir = "G:\\Database\\ColorThemeRandom"
+    theme_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
+    theme_dir = "G:\\Database\\ColorTheme5"
     theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
     logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1812"
@@ -405,7 +405,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-#run_training()
+run_training()
 #test_one_image()
-test_theme_image()
+#test_theme_image()
 # test_batch_image()
