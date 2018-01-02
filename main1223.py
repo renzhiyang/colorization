@@ -342,11 +342,11 @@ def test_one_image():
 
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/iizuka.jpg"
-    theme_Dir = "test/test_sparses/iizuka.bmp"
-    output_Dir = "output/output1215/iizuka2.jpg"
-    mask_Dir = "test/test_mask/iizuka.bmp"
-    checkpoint_Dir = "logs/log1215/model.ckpt-149999"
+    test_Dir = "test/test_images/15.jpg"
+    theme_Dir = "test/test_sparses/theme (1).bmp"
+    output_Dir = "output/1228/15-1.jpg"
+    mask_Dir = "test/test_mask/theme_mask.bmp"
+    checkpoint_Dir = "logs/log1228/model.ckpt-149999"
 
     # get mask image
     image_size = 224
