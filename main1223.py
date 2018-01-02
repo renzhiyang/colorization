@@ -222,6 +222,17 @@ def get_mask_channels(mask_img, image_size):
     mask_two_channels = mask_img[:, :, :, 1:]
     return mask_one_channel, mask_two_channels
 
+def get_theme_channels(theme_img, type):
+    if type == "jpg":
+        l_channel = tf.image.decode_jpeg(image, channels = 3)
+    if type == "bmp":
+        l_channel = tf.image.decode_bmp(image, channels = 3)
+    theme_img = tf.image.decode_bmp(theme_img)
+    theme_img = tf.image.resize_images(theme_img, [1, 7])
+    theme_img = tf.cast(mask_img, tf.float32) / 255.0
+    theme_img = tf.reshape(theme_img, [1, 1, 7, 1])
+    return theme_img
+
 
 def test_one_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
@@ -329,7 +340,63 @@ def test_one_image():
 
     plt.imsave(output_Dir, image_out)
 
+def test_theme_image():
+    # sparse_name: blueLine, none, red&blue, red&blue2, redLine
+    test_Dir = "test/test_images/iizuka.jpg"
+    theme_Dir = "test/test_sparses/iizuka.bmp"
+    output_Dir = "output/output1215/iizuka2.jpg"
+    mask_Dir = "test/test_mask/iizuka.bmp"
+    checkpoint_Dir = "logs/log1215/model.ckpt-149999"
 
-run_training()
+    # get mask image
+    image_size = 224
+    get_mask(sparse_Dir, mask_Dir, image_size)
+
+    test_img = tf.read_file(test_Dir)
+    l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
+
+    theme_img = tf.read_file(theme_Dir, "bmp")
+    theme = get_theme_channels(theme_img, image_size)
+
+    mask_img = tf.read_file(mask_Dir)
+    mask = get_theme_channels(mask_img, "bmp")
+
+    ab_channel = (ab_channel + 128) / 255
+
+    theme_input = tf.concat([theme, mask], 3)
+
+    ab_out = model.built_network1212(ab_channel, theme_input)
+
+    # load ckpt file, load the model
+    logs_dir = 'F:/Project_Yang/Code/mainProject/logs/log1208'
+    saver = tf.train.Saver()
+
+    sess = tf.Session()
+    print('载入检查点...')
+
+    ckpt = tf.train.get_checkpoint_state(logs_dir)
+    if ckpt and ckpt.model_checkpoint_path:
+        ckpt.model_checkpoint_path = checkpoint_Dir
+        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print('载入成功, global_step = %s' % global_step)
+    else:
+        print('载入失败')
+
+    l_channel = tf.cast(l_channel, tf.float64)
+    ab_out = tf.cast(ab_out, tf.float64)
+
+    l, ab = sess.run([l_channel, ab_out])
+    l = l[0]
+    ab = ab[0]
+    l = l * 100
+    ab = ab * 255 - 128
+    img_out = np.concatenate([l, ab], 2)
+    img_out = color.lab2rgb(img_out)
+    plt.imsave(output_Dir, img_out)
+
+
+#run_training()
 #test_one_image()
+test_theme_image()
 # test_batch_image()
