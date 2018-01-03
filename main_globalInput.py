@@ -17,7 +17,7 @@ IMAGE_SIZE = 224
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
-#theme input, use 3 resnet, 5 color theme
+#global theme input, use 3 resnet, 5 color theme
 def run_training():
     train_dir = "G:\\Database\\trainImages"
     #image_index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
