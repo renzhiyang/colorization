@@ -225,22 +225,23 @@ def get_theme_channels(theme_img, type):
         theme_img = tf.image.decode_jpeg(theme_img, channels = 3)
     if type == "bmp":
         theme_img = tf.image.decode_bmp(theme_img, channels = 3)
-    theme_img = tf.image.resize_images(theme_img, [1, 7])
+    theme_img = tf.image.resize_images(theme_img, [1, 5])
     theme_img = tf.cast(theme_img, tf.float32) / 255.0
-    theme_img = tf.reshape(theme_img, [1, 1, 7, 3])
+    theme_img = tf.reshape(theme_img, [1, 1, 5, 3])
     theme_ab = theme_img[:, :, :, 1:]
     return theme_ab
 
 def get_theme_mask(theme_mask, type):
-    if type == "jpg":
+    '''if type == "jpg":
         theme_mask = tf.image.decode_jpeg(theme_mask, channels = 3)
     if type == "bmp":
         theme_mask = tf.image.decode_bmp(theme_mask, channels = 3)
-
     theme_mask = tf.image.resize_images(theme_mask, [1, 7])
     theme_mask = tf.cast(theme_mask, tf.float32) / 255.0
     theme_mask = tf.reshape(theme_mask, [1, 1, 7, 3])
-    theme_mask = theme_mask[:, :, :, 0:1]
+    theme_mask = tf.reshape(theme_mask[:, :, :, 0], [1, 1, 7, 1])'''
+
+    theme_mask = tf.ones([1, 1, 5, 1], dtype=tf.float32)
     return theme_mask
 
 
@@ -352,11 +353,11 @@ def test_one_image():
 
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/12.jpg"
-    theme_Dir = "test/test_theme/12.bmp"
-    output_Dir = "output/1228/12.jpg"
+    test_Dir = "test/test_images/27.jpg"
+    theme_Dir = "test/test_theme/1 (4).bmp"
+    output_Dir = "output/1812/27-1 (4).jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log1228/model.ckpt-149999"
+    checkpoint_Dir = "logs/log1812/model.ckpt-82500"
 
     # get mask image
     image_size = 224
