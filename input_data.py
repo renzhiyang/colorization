@@ -333,11 +333,12 @@ def get_themeObj_batch(file_list, batch_size, capacity):
     theme_index = tf.cast(theme_index, tf.float32) / 255
 
     #theme mask list
-    theme_mask = tf.read_file(filename_queue[3])
+    '''theme_mask = tf.read_file(filename_queue[3])
     theme_mask = tf.image.decode_bmp(theme_mask, channels=3)
     theme_mask = tf.image.resize_images(theme_mask, [1, 5])
     theme_mask = tf.cast(theme_mask[:, :, 0], tf.float32) / 255
-    theme_mask = tf.reshape(theme_mask, [1, 5, 1])
+    theme_mask = tf.reshape(theme_mask, [1, 5, 1])'''
+    theme_mask = tf.ones([1, 5, 1], dtype = tf.float32)
 
     train_batch, theme_batch, theme_index_batch, theme_mask_batch = \
         tf.train.shuffle_batch([train_image, theme, theme_index, theme_mask],
