@@ -46,8 +46,8 @@ def middle_layer(input_batch):
         conv2 = build_ResnetBlock(conv1, filters * 8, name="conv2")
         conv3 = build_ResnetBlock(conv2, filters * 8, name="conv3")
         conv4 = build_ResnetBlock(conv3, filters * 8, name="conv4")
-        conv5 = build_ResnetBlock(conv4, filters * 8, name="conv5")
-        return conv3
+        #conv5 = build_ResnetBlock(conv4, filters * 8, name="conv5")
+        return conv4
 
 def decode(input_batch, layer1, layer2, layer3):
     with tf.name_scope("decode") as scope:
