@@ -280,26 +280,26 @@ def get_batch_1219(file_list, batch_size, capacity):
     return l_batch, ab_bacth, mask_batch, mask_batch_2channels
 
 
-def get_themeInput_list(train_dir, theme_dir, theme_index_dir, theme_mask_dir):
+def get_themeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir):
     train_list = get_all_files(train_dir)
     theme_list = get_all_files(theme_dir)
     theme_index_list = get_all_files(theme_index_dir)
-    theme_mask_list = get_all_files(theme_mask_dir)
+    image_index_list = get_all_files(image_index_dir)
 
     print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
     print("训练目录%s, 文件个数%d" % (theme_dir, len(theme_list)))
     print("训练目录%s, 文件个数%d" % (theme_index_dir, len(theme_index_list)))
-    print("训练目录%s, 文件个数%d" % (theme_mask_dir, len(theme_mask_list)))
+    print("训练目录%s, 文件个数%d" % (image_index_dir, len(image_index_list)))
 
-    temp = np.array([train_list, theme_list, theme_index_list, theme_mask_list])
+    temp = np.array([train_list, theme_list, theme_index_list, image_index_list])
     temp = temp.transpose()
     np.random.shuffle(temp)
     train_list = list(temp[:, 0])
     theme_list = list(temp[:, 1])
     theme_index_list = list(temp[:, 2])
-    theme_mask_list = list(temp[:, 3])
+    image_index_list = list(temp[:, 3])
 
-    return [train_list, theme_list, theme_index_list, theme_mask_list]
+    return [train_list, theme_list, theme_index_list, image_index_list]
 
 def get_themeObj_batch(file_list, batch_size, capacity):
     image_size = 224
@@ -312,12 +312,6 @@ def get_themeObj_batch(file_list, batch_size, capacity):
     train_image = tf.image.decode_jpeg(train_image, channels=3)
     train_image = tf.image.resize_images(train_image, [image_size, image_size])
     train_image = tf.cast(train_image, tf.float32) / 255
-
-    #image index list
-    #image_index = tf.read_file(filename_queue[1])
-    #image_index = tf.image.decode_jpeg(image_index, channels=3)
-    #image_index = tf.image.resize_images(image_index, [image_size, image_size])
-    #image_index = tf.cast(image_index, tf.float32) / 255
 
 
     #theme list
@@ -340,8 +334,14 @@ def get_themeObj_batch(file_list, batch_size, capacity):
     theme_mask = tf.reshape(theme_mask, [1, 5, 1])'''
     theme_mask = tf.ones([1, 5, 1], dtype = tf.float32)
 
-    train_batch, theme_batch, theme_index_batch, theme_mask_batch = \
-        tf.train.shuffle_batch([train_image, theme, theme_index, theme_mask],
+    #image index list
+    image_index = tf.read_file(filename_queue[3])
+    image_index = tf.image.decode_jpeg(image_index, channels=3)
+    image_index = tf.image.resize_images(image_index, [image_size, image_size])
+    image_index = tf.cast(image_index, tf.float32) / 255
+
+    train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch = \
+        tf.train.shuffle_batch([train_image, theme, theme_index, theme_mask, image_index],
                                batch_size=batch_size,
                                capacity=capacity,
                                min_after_dequeue=500,
