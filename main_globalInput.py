@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import input_data
-import model1223 as model
+import model_globalInput as model
 from math import isnan
 from matplotlib import pyplot as plt
 import skimage.color as color
