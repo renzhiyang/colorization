@@ -168,23 +168,28 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
 
 
 #loss function
-def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch):
+def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch, image_exceptPoints, out_exceptPoints):
     with tf.name_scope('loss') as scope:
-        #index sobel loss
-        #sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
-        #index loss
-        index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5)
-        #image loss
-        image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
-        #color theme loss
-        color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5)
+        #global loss
+        index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5) #index loss
+        image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5) #image loss
+        color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5) #color theme loss
+        global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
 
-        whole_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
+        #local loss
+        sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
+        exceptPoints_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #except points loss
+
+        whole_loss = global_loss + local_loss
         tf.summary.scalar("whole_loss", whole_loss)
-        tf.summary.scalar("image_loss", image_loss)
+        tf.summary.scalar("global_loss", global_loss)
+        tf.summary.scalar("local_loss", local_loss)
+        tf.summary.scalar("sobel_loss", sobel_loss)
+        tf.summary.scalar("exceptPoints_loss", exceptPoints_loss)
         tf.summary.scalar("index_loss", index_loss)
+        tf.summary.scalar("image_loss", image_loss)
         tf.summary.scalar("color_loss", color_loss)
-        return whole_loss, image_loss, index_loss, color_loss
+        return whole_loss, global_loss, local_loss, index_loss, image_loss, color_loss, sobel_loss, exceptPoints_loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
