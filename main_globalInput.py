@@ -19,14 +19,14 @@ IMAGE_SIZE = 224
 
 #global theme input, use 3 resnet, 5 color theme
 def run_training():
-    train_dir = "G:\\Database\\ColoredData\\new_colorimage4"
-    theme_index_dir = "G:\\Database\\ColoredData\\ColorMap4to1"
-    image_index_dir = "G:\\Database\\ColoredData\\new_colorimage1"
-    theme_dir = "G:\\Database\\ColoredData\\new_colortheme1"
+    train_dir = "G:\\Database\\ColoredData\\new_colorimage1"
+    theme_index_dir = "G:\\Database\\ColoredData\\ColorMap5_image4"
+    image_index_dir = "G:\\Database\\ColoredData\\new_colorimage4"
+    theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     #theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1812"
-    result_dir = "results/1812/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1814"
+    result_dir = "results/1814/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir)
