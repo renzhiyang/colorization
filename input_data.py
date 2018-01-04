@@ -347,6 +347,81 @@ def get_themeObj_batch(file_list, batch_size, capacity):
                                min_after_dequeue=500,
                                num_threads=64)
 
-    return train_batch, theme_batch, theme_index_batch, theme_mask_batch
+    return train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch
+
+def get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir):
+    train_list = get_all_files(train_dir)
+    theme_list = get_all_files(theme_dir)
+    theme_index_list = get_all_files(theme_index_dir)
+    image_index_list = get_all_files(image_index_dir)
+    sparse_mask_list = get_all_files(sparse_mask_dir)
+
+    print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
+    print("训练目录%s, 文件个数%d" % (theme_dir, len(theme_list)))
+    print("训练目录%s, 文件个数%d" % (theme_index_dir, len(theme_index_list)))
+    print("训练目录%s, 文件个数%d" % (image_index_dir, len(image_index_list)))
+    print("训练目录%s, 文件个数%d" % (sparse_mask_dir, len(sparse_mask_list)))
+
+    temp = np.array([train_list, theme_list, theme_index_list, image_index_list, sparse_mask_list])
+    temp = temp.transpose()
+    np.random.shuffle(temp)
+    train_list = list(temp[:, 0])
+    theme_list = list(temp[:, 1])
+    theme_index_list = list(temp[:, 2])
+    image_index_list = list(temp[:, 3])
+    sparse_mask_list = list(temp[:, 4])
+
+    return [train_list, theme_list, theme_index_list, image_index_list, sparse_mask_list]
+
+def get_wholeObj_batch(file_list, batch_size, capacity):
+    image_size = 224
+
+    # produce queue
+    filename_queue = tf.train.slice_input_producer(file_list, shuffle=False)
+
+    # train image list
+    train_image = tf.read_file(filename_queue[0])
+    train_image = tf.image.decode_jpeg(train_image, channels=3)
+    train_image = tf.image.resize_images(train_image, [image_size, image_size])
+    train_image = tf.cast(train_image, tf.float32) / 255
+
+
+    #theme list
+    theme = tf.read_file(filename_queue[1])
+    theme = tf.image.decode_bmp(theme, channels=3)
+    theme = tf.image.resize_images(theme, [1, 5])
+    theme = tf.cast(theme, tf.float32) / 255
+
+    #theme index list
+    theme_index = tf.read_file(filename_queue[2])
+    theme_index = tf.image.decode_jpeg(theme_index, channels=3)
+    theme_index = tf.image.resize_images(theme_index, [image_size, image_size])
+    theme_index = tf.cast(theme_index, tf.float32) / 255
+
+    #theme mask list
+    theme_mask = tf.ones([1, 5, 1], dtype = tf.float32)
+
+    #image index list
+    image_index = tf.read_file(filename_queue[3])
+    image_index = tf.image.decode_jpeg(image_index, channels=3)
+    image_index = tf.image.resize_images(image_index, [image_size, image_size])
+    image_index = tf.cast(image_index, tf.float32) / 255
+
+    #spare mask list
+    sparse_mask = tf.read_file(filename_queue[4])
+    sparse_mask = tf.image.decode_bmp(sparse_mask, channels=3)
+    sparse_mask = tf.image.resize_images(sparse_mask, [image_size, image_size])
+    sparse_mask = f.cast(sparse_mask, tf.float32) / 255
+    sparse_mask2channels = sparse_mask[:, :, :, 0:2]
+
+
+    train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch = \
+        tf.train.shuffle_batch([train_image, theme, theme_index, theme_mask, image_index, sparse_mask2channels],
+                               batch_size=batch_size,
+                               capacity=capacity,
+                               min_after_dequeue=500,
+                               num_threads=64)
+
+    return train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch
 
 
