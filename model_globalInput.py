@@ -107,6 +107,52 @@ def decode_deconv(input_batch, layer1, layer2, layer3):
 
         return tf.nn.tanh(conv3_2, name="output")
 
+def decode2(input_batch, layer1, layer2, layer3):
+    with tf.name_scope("decode2") as scope:
+        kernel_size = 3
+        filters = 64
+
+def newEncode(input_batch):
+    with tf.name_scope("newEncode") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1_1 = general_conv2d(input_batch, filters, kernel_size, 2, name = "newEn_conv11")
+        conv1_2 = general_conv2d(conv1_1, filters * 2, kernel_size, 1, name = "newEn_conv12")
+        conv2_1 = general_conv2d(conv1_2, filters * 2, kernel_size, 2, name = "newEn_conv21")
+        conv2_2 = general_conv2d(conv2_1, filters * 4, kernel_size, 1, name = "newEn_conv22")
+        conv3_1 = general_conv2d(conv2_2, filters * 4, kernel_size, 2, name = "newEn_conv31")
+        conv3_2 = general_conv2d(conv3_1, filters * 8, kernel_size, 1, name = "newEn_conv32")
+        return [conv1_1, conv2_1], conv3_2
+
+def newMiddle_layer(input_batch):
+    with tf.name_scope("newMiddle_layer") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
+        conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
+        conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
+        conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
+        conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
+        conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
+        conv7 = general_conv2d(conv6, filters * 4, kernel_size, 1, name = "newMid_conv7")
+        return conv7
+
+def newDecode2(input_batch, uNetLayer):
+    with tf.name_scope("newEncode2") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1 = general_conv2d(input_batch, filters * 2, kernel_size, 1, name = "newDeco2_conv1")
+        coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        uplayer1 = upsample_layer(conv1, 2, scope_name="newDeco2_uplayer1") + (1 - coef1) * uNetLayer[1]
+        conv2_1 = general_conv2d(uplayer1, filters, kernel_size, 1, name = "newDeco2_conv21")
+        conv2_2 = general_conv2d(conv2_1, filters, kernel_size, 1, name = "newDeco2_conv22")
+        coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        uplayer2 = upsample_layer(conv2_2, 2, scope_name="newDeco2_uplayer2") + (1 - coef2) * uNetLayer[0]
+        conv3_1 = general_conv2d(uplayer2, filters / 2, kernel_size, 1, name = "newDeco2_conv31")
+        conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, name = "newDeco2_conv32")
+        uplayer3 = upsample_layer(conv3_2, 2, scope_name = "newDeco2_uplayer3")
+        return uplayer3
+
 def theme_features_network(theme_batch, num_outputs):
     with tf.name_scope("theme_features_network") as scope:
         batch_size = theme_batch.get_shape()[0].value
@@ -141,6 +187,15 @@ def fusion_layer(source_feature, target_feature):
 
         return fusion_feature
 
+def new_built_newwork(input_ab_batch, theme_input):
+    with tf.name_scope("new_built_newwork") as scope:
+        unetLayer, encodeResult = newEncode(input_ab_batch)
+        middle_output = newMiddle_layer(encodeResult)
+        theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
+        fusion_out = fusion_layer(middle_output, theme_output)
+        out_ab_batch = newDecode2(fusion_out, unetLayer)
+        return out_ab_batch
+
 def built_network(input_ab_batch, theme_input):
     with tf.name_scope("network") as scope:
         kernel_size = 3
@@ -153,7 +208,9 @@ def built_network(input_ab_batch, theme_input):
         out_ab_batch = decode_deconv(fusion_out, layer1, layer2, layer3)
         return out_ab_batch
 
-
+input_ab_batch = tf.ones([1, 224, 224, 2])
+theme_input = tf.ones([1, 1, 5, 2])
+new_built_newwork(input_ab_batch, theme_input)
 
 # Loss函数
 def L1_loss(out_batch, index_batch, name):
