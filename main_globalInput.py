@@ -57,7 +57,7 @@ def run_training():
     theme_input = tf.concat([theme_ab_batch, theme_mask_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.built_network(image_ab_batch, theme_input)
+    out_ab_batch = model.new_built_network(image_ab_batch, theme_input)
 
     image_l_batch = tf.cast(image_l_batch, tf.float64)
     theme_lab_batch = tf.cast(theme_lab_batch, tf.float64)
@@ -98,7 +98,7 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 500 == 0:
+            if step % 100 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
