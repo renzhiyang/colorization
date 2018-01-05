@@ -86,19 +86,24 @@ def decode_deconv(input_batch, layer1, layer2, layer3):
     with tf.name_scope("decode_deconv") as scope:
         kernel_size = 3
         filters = 64
+        print([scope, input_batch])
         coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv1_1 = general_deconv2d(input_batch, filters * 4, kernel_size, 1, name = "deconv_conv1_1") + (1 + coef1) * layer3
-        conv1_2 = general_conv2d(conv1_1, filters * 4, kernel_size, 1, name = "deconv_conv1_2")
-        conv1_3 = general_conv2d(conv1_2, filters * 4, kernel_size, 1, name = "deconv_conv1_3")
+        conv1_1 = general_deconv2d(input_batch, filters * 4, kernel_size, 2, name = "deconv_conv11") + (1 + coef1) * layer3
+        print([scope, conv1_1])
+        conv1_2 = general_conv2d(conv1_1, filters * 4, kernel_size, 1, name = "deconv_conv12")
+        conv1_3 = general_conv2d(conv1_2, filters * 4, kernel_size, 1, name = "deconv_conv13")
 
         coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
-        conv2_1 = general_deconv2d(conv1_3, filters * 2, kernel_size, 1, name = "deconv_conv2_1") + (1 + coef2) * layer2
-        conv2_2 = general_conv2d(conv2_1, filters * 2, kernel_size, 1, name = "deconv_conv2_2")
+        conv2_1 = general_deconv2d(conv1_3, filters * 2, kernel_size, 2, name = "deconv_conv21") + (1 + coef2) * layer2
+        print([scope, conv2_1])
+        conv2_2 = general_conv2d(conv2_1, filters * 2, kernel_size, 1, name = "deconv_conv22")
 
         coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         uplayer = upsample_layer(conv2_2, 2, scope_name="uplayer")
-        conv3_1 = general_conv2d(conv2_2, filters * 2, kernel_size, 1, name = "deconv_conv3_1")
-        conv3_2 = general_conv2d(conv2_2, 2, 1, 1, name="deconv_conv3_2")
+        print([scope, uplayer])
+        conv3_1 = general_conv2d(tf.concat([uplayer, layer1], 3), filters * 2, kernel_size, 1, name = "deconv_conv31")
+        print([scope, conv3_1])
+        conv3_2 = general_conv2d(conv3_1, 2, 1, 1, name="deconv_conv3_2")
 
         return tf.nn.tanh(conv3_2, name="output")
 
@@ -145,7 +150,7 @@ def built_network(input_ab_batch, theme_input):
         middle_output = middle_layer(layer3)
         theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         fusion_out = fusion_layer(middle_output, theme_output)
-        out_ab_batch = decode(fusion_out, layer1, layer2, layer3)
+        out_ab_batch = decode_deconv(fusion_out, layer1, layer2, layer3)
         return out_ab_batch
 
 
@@ -199,6 +204,7 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
         #index sobel loss
         #sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
         #index loss
+        print([output_ab_batch, index_ab_batch])
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5)
         #image loss
         image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
