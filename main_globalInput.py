@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     #theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1814"
-    result_dir = "results/1814/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1815"
+    result_dir = "results/1815/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir)
@@ -34,9 +34,10 @@ def run_training():
 
     #rgb_to_lab
     train_batch = tf.cast(train_batch, tf.float64)
-    image_index_batch = tf.cast(train_batch, tf.float64)
+    image_index_batch = tf.cast(image_index_batch, tf.float64)
     theme_batch = tf.cast(theme_batch, tf.float64)
     theme_index_batch = tf.cast(theme_index_batch, tf.float64)
+
     train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
     theme_lab_batch = tf.cast(input_data.rgb_to_lab(theme_batch), tf.float32)
     index_lab_batch = tf.cast(input_data.rgb_to_lab(image_index_batch), tf.float32)
@@ -48,6 +49,7 @@ def run_training():
     image_l_batch = tf.reshape(train_lab_batch[:, :, :, 0] / 100, [BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, 1])
     image_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
     theme_ab_batch = (theme_lab_batch[:, :, :, 1:] + 128) / 255
+    theme_l_batch = (theme_lab_batch[:, :, :, 0:1] + 128) / 255
     index_ab_batch = (index_lab_batch[:, :, :, 1:] + 128) / 255
     themeIndex_ab_batch = (themeIndex_lab_batch[:, :, :, 1:] + 128) / 255
 
@@ -58,6 +60,7 @@ def run_training():
     out_ab_batch = model.built_network(image_ab_batch, theme_input)
 
     image_l_batch = tf.cast(image_l_batch, tf.float64)
+    theme_lab_batch = tf.cast(theme_lab_batch, tf.float64)
 
     sess = tf.Session()
 
@@ -95,14 +98,14 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
-                l, ab, ab_index, ab_out, theme = sess.run(
-                    [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_batch])
+            if step % 100 == 0:
+                l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
+                    [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
                 ab = ab[0] * 255 - 128
                 ab_index = ab_index[0] * 255 - 128
                 ab_out = ab_out[0] * 255 - 128
-                theme = theme[0] * 255
+                colored = colored[0] * 255 - 128
 
                 img_in = np.concatenate([l, ab], 2)
                 img_in = color.lab2rgb(img_in)
@@ -110,26 +113,33 @@ def run_training():
                 img_out = color.lab2rgb(img_out)
                 img_index = np.concatenate([l, ab_index], 2)
                 img_index = color.lab2rgb(img_index)
+                img_colored = np.concatenate([l, colored], 2)
+                img_colored = color.lab2rgb(img_colored)
+                theme = color.lab2rgb(theme_lab[0])
 
-                plt.subplot(4, 4, 1), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
-                plt.subplot(4, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
-                plt.subplot(4, 4, 4), plt.imshow(img_in)
+                plt.subplot(5, 4, 1), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 2), plt.imshow(ab[:, :, 0], 'gray')
+                plt.subplot(5, 4, 3), plt.imshow(ab[:, :, 1], 'gray')
+                plt.subplot(5, 4, 4), plt.imshow(img_in)
 
-                plt.subplot(4, 4, 5), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
-                plt.subplot(4, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
-                plt.subplot(4, 4, 8), plt.imshow(img_out)
+                plt.subplot(5, 4, 5), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 6), plt.imshow(ab_out[:, :, 0], 'gray')
+                plt.subplot(5, 4, 7), plt.imshow(ab_out[:, :, 1], 'gray')
+                plt.subplot(5, 4, 8), plt.imshow(img_out)
 
-                plt.subplot(4, 4, 9), plt.imshow(l[:, :, 0], 'gray')
-                plt.subplot(4, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
-                plt.subplot(4, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
-                plt.subplot(4, 4, 12), plt.imshow(img_index)
+                plt.subplot(5, 4, 9), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 10), plt.imshow(ab_index[:, :, 0], 'gray')
+                plt.subplot(5, 4, 11), plt.imshow(ab_index[:, :, 1], 'gray')
+                plt.subplot(5, 4, 12), plt.imshow(img_index)
 
-                plt.subplot(4, 4, 13), plt.imshow(theme)
+                plt.subplot(5, 4, 13), plt.imshow(l[:, :, 0], 'gray')
+                plt.subplot(5, 4, 14), plt.imshow(colored[:, :, 0], 'gray')
+                plt.subplot(5, 4, 15), plt.imshow(colored[:, :, 1], 'gray')
+                plt.subplot(5, 4, 16), plt.imshow(img_colored)
+
+                plt.subplot(5, 4, 17), plt.imshow(theme)
                 plt.savefig(result_dir + str(step) + "_image.png")
                 plt.show()
-
 
 
                 plt.figure(figsize=(8,8))
