@@ -82,6 +82,26 @@ def decode(input_batch, layer1, layer2, layer3):
         print([scope, conv3_3])
         return tf.nn.tanh(conv3_3, name="output")
 
+def decode_deconv(input_batch, layer1, layer2, layer3):
+    with tf.name_scope("decode_deconv") as scope:
+        kernel_size = 3
+        filters = 64
+        coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv1_1 = general_deconv2d(input_batch, filters * 4, kernel_size, 1, name = "deconv_conv1_1") + (1 + coef1) * layer3
+        conv1_2 = general_conv2d(conv1_1, filters * 4, kernel_size, 1, name = "deconv_conv1_2")
+        conv1_3 = general_conv2d(conv1_2, filters * 4, kernel_size, 1, name = "deconv_conv1_3")
+
+        coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        conv2_1 = general_deconv2d(conv1_3, filters * 2, kernel_size, 1, name = "deconv_conv2_1") + (1 + coef2) * layer2
+        conv2_2 = general_conv2d(conv2_1, filters * 2, kernel_size, 1, name = "deconv_conv2_2")
+
+        coef3 = tf.get_variable("coef3", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        uplayer = upsample_layer(conv2_2, 2, scope_name="uplayer")
+        conv3_1 = general_conv2d(conv2_2, filters * 2, kernel_size, 1, name = "deconv_conv3_1")
+        conv3_2 = general_conv2d(conv2_2, 2, 1, 1, name="deconv_conv3_2")
+
+        return tf.nn.tanh(conv3_2, name="output")
+
 def theme_features_network(theme_batch, num_outputs):
     with tf.name_scope("theme_features_network") as scope:
         batch_size = theme_batch.get_shape()[0].value
