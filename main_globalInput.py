@@ -65,7 +65,7 @@ def run_training():
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss, image_loss, index_loss, color_loss = model.whole_loss(out_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch)
+    train_loss, index_loss, color_loss = model.whole_loss(out_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
@@ -82,7 +82,7 @@ def run_training():
             if coord.should_stop():
                 break
 
-            _, tra_loss, img_loss, ind_loss, col_loss = sess.run([train_op, train_loss, image_loss, index_loss, color_loss])
+            _, tra_loss, ind_loss, col_loss = sess.run([train_op, train_loss, index_loss, color_loss])
             tra_rmse, tra_psnr = sess.run([train_rmse, train_psnr])
 
             if isnan(tra_loss):
@@ -93,7 +93,7 @@ def run_training():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,  loss: %g,  image_loss: %g,  index_loss: %g,  color_loss: %g,  rmse: %g,  psnr: %g" % (step, tra_loss, img_loss, ind_loss, col_loss, tra_rmse, tra_psnr))
+                print("Step: %d,  loss: %g,  index_loss: %g,  color_loss: %g,  rmse: %g,  psnr: %g" % (step, tra_loss, ind_loss, col_loss, tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
