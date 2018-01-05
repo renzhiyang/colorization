@@ -132,9 +132,9 @@ def newMiddle_layer(input_batch):
         conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
         conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
         conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
-        conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
-        conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
-        conv7 = general_conv2d(conv6, filters * 4, kernel_size, 1, name = "newMid_conv7")
+        #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
+        #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
+        conv7 = general_conv2d(conv4, filters * 4, kernel_size, 1, name = "newMid_conv7")
         return conv7
 
 def newDecode2(input_batch, uNetLayer):
@@ -260,16 +260,16 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
         print([output_ab_batch, index_ab_batch])
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5)
         #image loss
-        image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
+        #image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
         #color theme loss
         color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5)
 
-        whole_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
+        whole_loss = 0.3 * index_loss + 0.7 * color_loss
         tf.summary.scalar("whole_loss", whole_loss)
-        tf.summary.scalar("image_loss", image_loss)
+        #tf.summary.scalar("image_loss", image_loss)
         tf.summary.scalar("index_loss", index_loss)
         tf.summary.scalar("color_loss", color_loss)
-        return whole_loss, image_loss, index_loss, color_loss
+        return whole_loss, index_loss, color_loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
