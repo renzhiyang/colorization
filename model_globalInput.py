@@ -187,7 +187,7 @@ def fusion_layer(source_feature, target_feature):
 
         return fusion_feature
 
-def new_built_newwork(input_ab_batch, theme_input):
+def new_built_network(input_ab_batch, theme_input):
     with tf.name_scope("new_built_newwork") as scope:
         unetLayer, encodeResult = newEncode(input_ab_batch)
         middle_output = newMiddle_layer(encodeResult)
@@ -207,10 +207,6 @@ def built_network(input_ab_batch, theme_input):
         fusion_out = fusion_layer(middle_output, theme_output)
         out_ab_batch = decode_deconv(fusion_out, layer1, layer2, layer3)
         return out_ab_batch
-
-input_ab_batch = tf.ones([1, 224, 224, 2])
-theme_input = tf.ones([1, 1, 5, 2])
-new_built_newwork(input_ab_batch, theme_input)
 
 # Loss函数
 def L1_loss(out_batch, index_batch, name):
