@@ -57,7 +57,7 @@ def run_training():
     theme_input = tf.concat([theme_ab_batch, theme_mask_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.new_built_network(image_ab_batch, theme_input)
+    out_ab_batch = model.new_built_network(image_ab_batch, theme_ab_batch)
 
     image_l_batch = tf.cast(image_l_batch, tf.float64)
     theme_lab_batch = tf.cast(theme_lab_batch, tf.float64)
