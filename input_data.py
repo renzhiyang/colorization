@@ -55,6 +55,8 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
+        if len(filename_list) > 10000:
+            break
     return filename_list
 
 
@@ -290,8 +292,6 @@ def get_themeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir):
     print("训练目录%s, 文件个数%d" % (theme_dir, len(theme_list)))
     print("训练目录%s, 文件个数%d" % (theme_index_dir, len(theme_index_list)))
     print("训练目录%s, 文件个数%d" % (image_index_dir, len(image_index_list)))
-    print(image_index_list[2])
-    print(theme_list[2])
 
     temp = np.array([train_list, theme_list, theme_index_list, image_index_list])
     temp = temp.transpose()
