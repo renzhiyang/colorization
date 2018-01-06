@@ -54,17 +54,15 @@ def instance_norm(x):
         return out
 
 
-def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=True, do_relu=True, relufactor=0, name="conv2d"):
+def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=False, do_relu=True, relufactor=0.2, name="conv2d"):
     stddev=0.02
     with tf.variable_scope(name):
-
-
         conv = tf.contrib.layers.conv2d(inputs=inputconv,
                                        num_outputs=filters,
                                        kernel_size=kernel_size,
                                        stride=strides,
                                        activation_fn = None,
-                                       weights_initializer = tf.truncated_normal_initializer(stddev=stddev),
+                                       #weights_initializer = tf.truncated_normal_initializer(stddev=stddev),
                                        scope=name)
 
         if do_norm:
@@ -74,7 +72,8 @@ def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=True, do_re
             if(relufactor == 0):
                 conv = tf.nn.relu(conv,"relu")
             else:
-                conv = lrelu(conv, relufactor, "lrelu")
+                #conv = lrelu(conv, relufactor, "lrelu")
+                conv = tf.nn.tanh(conv, name = "tanh")
         return conv
 
 
