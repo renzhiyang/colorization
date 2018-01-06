@@ -150,7 +150,8 @@ def newDecode2(input_batch, uNetLayer):
         coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         uplayer2 = upsample_layer(conv2_2, 2, scope_name="newDeco2_uplayer2") + (1 - coef2) * uNetLayer[0]
         conv3_1 = general_conv2d(uplayer2, filters / 2, kernel_size, 1, name = "newDeco2_conv31")
-        conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, name = "newDeco2_conv32")
+        conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, do_relu=False, name = "newDeco2_conv32")
+        conv3_2 = tf.sigmoid(conv3_2, "addSigmoid")
         uplayer3 = upsample_layer(conv3_2, 2, scope_name = "newDeco2_uplayer3")
         return uplayer3
 
