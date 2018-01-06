@@ -136,12 +136,12 @@ def newMiddle_layer(input_batch):
         #conv6 = general_conv2d(conv5, filters * 8, kernel_size, 1, name="newMid_conv6")
         #conv7 = general_conv2d(conv6, filters * 8, kernel_size, 1, name="newMid_conv7")
         #conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
-        #conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
+        conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
         #conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
         #conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
         #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
         #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
-        conv8 = general_conv2d(conv1, filters * 4, kernel_size, 1, name = "newMid_conv8")
+        conv8 = general_conv2d(conv2, filters * 4, kernel_size, 1, name = "newMid_conv8")
         return conv8
 
 def newDecode2(input_batch, uNetLayer):
