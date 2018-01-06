@@ -129,14 +129,20 @@ def newMiddle_layer(input_batch):
         kernel_size = 3
         filters = 64
         conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "newMid_conv1")
+        #conv2 = general_conv2d(conv1, filters * 8, kernel_size, 1, name = "newMid_conv2")
+        #conv3 = general_conv2d(conv2, filters * 8, kernel_size, 1, name = "newMid_conv3")
+        #conv4 = general_conv2d(conv3, filters * 8, kernel_size, 1, name="newMid_conv4")
+        #conv5 = general_conv2d(conv4, filters * 8, kernel_size, 1, name="newMid_conv5")
+        #conv6 = general_conv2d(conv5, filters * 8, kernel_size, 1, name="newMid_conv6")
+        #conv7 = general_conv2d(conv6, filters * 8, kernel_size, 1, name="newMid_conv7")
         #conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
         #conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
         #conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
         #conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
         #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
         #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
-        conv7 = general_conv2d(conv1, filters * 4, kernel_size, 1, name = "newMid_conv7")
-        return conv7
+        conv8 = general_conv2d(conv1, filters * 4, kernel_size, 1, name = "newMid_conv8")
+        return conv8
 
 def newDecode2(input_batch, uNetLayer):
     with tf.name_scope("newEncode2") as scope:
@@ -151,7 +157,7 @@ def newDecode2(input_batch, uNetLayer):
         uplayer2 = upsample_layer(conv2_2, 2, scope_name="newDeco2_uplayer2") + (1 - coef2) * uNetLayer[0]
         conv3_1 = general_conv2d(uplayer2, filters / 2, kernel_size, 1, name = "newDeco2_conv31")
         conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, do_relu=False, name = "newDeco2_conv32")
-        conv3_2 = tf.sigmoid(conv3_2, "addSigmoid")
+        conv3_2 = tf.nn.tanh(conv3_2, "addSigmoid")
         uplayer3 = upsample_layer(conv3_2, 2, scope_name = "newDeco2_uplayer3")
         return uplayer3
 
