@@ -128,13 +128,14 @@ def newMiddle_layer(input_batch):
     with tf.name_scope("newMiddle_layer") as scope:
         kernel_size = 3
         filters = 64
-        conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
-        conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
-        conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
-        conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
+        conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "newMid_conv1")
+        #conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
+        #conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
+        #conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
+        #conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
         #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
         #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
-        conv7 = general_conv2d(conv4, filters * 4, kernel_size, 1, name = "newMid_conv7")
+        conv7 = general_conv2d(conv1, filters * 4, kernel_size, 1, name = "newMid_conv7")
         return conv7
 
 def newDecode2(input_batch, uNetLayer):
