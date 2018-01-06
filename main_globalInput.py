@@ -57,7 +57,7 @@ def run_training():
     theme_input = tf.concat([theme_ab_batch, theme_mask_batch], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.new_built_network(image_ab_batch, theme_ab_batch)
+    out_ab_batch = model.new_built_network(image_ab_batch, theme_input)
 
     image_l_batch = tf.cast(image_l_batch, tf.float64)
     theme_lab_batch = tf.cast(theme_lab_batch, tf.float64)
@@ -98,7 +98,7 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
+            if step % 500 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
@@ -163,11 +163,12 @@ def run_training():
 
                 axes4 = plt.subplot(224)
                 part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
-                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
-                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
+                part2 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
+                part3 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
+
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                axes4.legend((part1, part2, part3), ('input', 'index', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
