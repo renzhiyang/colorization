@@ -268,16 +268,16 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
         print([output_ab_batch, index_ab_batch])
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5)
         #image loss
-        #image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
+        image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5)
         #color theme loss
         color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5)
 
-        whole_loss = 0.3 * index_loss + 0.7 * color_loss
+        whole_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
         tf.summary.scalar("whole_loss", whole_loss)
-        #tf.summary.scalar("image_loss", image_loss)
+        tf.summary.scalar("image_loss", image_loss)
         tf.summary.scalar("index_loss", index_loss)
         tf.summary.scalar("color_loss", color_loss)
-        return whole_loss, index_loss, color_loss
+        return whole_loss, index_loss, color_loss, image_loss
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
