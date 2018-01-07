@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     #theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1815"
-    result_dir = "results/1815/"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log_global"
+    result_dir = "results/global/"
 
     # 获取输入
     image_list = input_data.get_themeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir)
@@ -65,7 +65,7 @@ def run_training():
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss, index_loss, color_loss = model.whole_loss(out_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch)
+    train_loss, index_loss, color_loss, image_loss = model.whole_loss(out_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
@@ -82,7 +82,7 @@ def run_training():
             if coord.should_stop():
                 break
 
-            _, tra_loss, ind_loss, col_loss = sess.run([train_op, train_loss, index_loss, color_loss])
+            _, tra_loss, ind_loss, col_loss, img_loss = sess.run([train_op, train_loss, index_loss, color_loss, image_loss])
             tra_rmse, tra_psnr = sess.run([train_rmse, train_psnr])
 
             if isnan(tra_loss):
@@ -93,12 +93,12 @@ def run_training():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,  loss: %g,  index_loss: %g,  color_loss: %g,  rmse: %g,  psnr: %g" % (step, tra_loss, ind_loss, col_loss, tra_rmse, tra_psnr))
+                print("Step: %d,  loss: %g,  index_loss: %g,  color_loss: %g, image_loss: %g,  rmse: %g,  psnr: %g" % (step, tra_loss, ind_loss, col_loss, img_loss, tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
+            if step % 500 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
@@ -143,32 +143,38 @@ def run_training():
 
 
                 plt.figure(figsize=(8,8))
-                axes1 = plt.subplot(221)
+                axes1 = plt.subplot(231)
                 axes1.scatter(ab[:, :, 0], ab[:, :, 1],alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('input images')
 
-                axes2 = plt.subplot(222)
+                axes2 = plt.subplot(232)
                 axes2.scatter(ab_out[:, :, 0], ab_out[:, :, 1],alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('output images')
 
-                axes3 = plt.subplot(223)
+                axes3 = plt.subplot(233)
                 axes3.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 plt.title('index images')
 
-                axes4 = plt.subplot(224)
-                part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
-                part2 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
-                part3 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
-
+                axes4 = plt.subplot(234)
+                axes4.scatter(colored[:, :, 0], colored[:, :, 1], alpha=0.5, edgecolor="white", s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'index', 'output'))
+                plt.title('colored images')
+
+                axes5 = plt.subplot(235)
+                part1 = axes5.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
+                part2 = axes5.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
+                part3 = axes5.scatter(colored[:, :, 0], colored[:, :, 1], alpha=0.5,edgecolor='white', label='image_out', c = 'y', s=8)
+                part4 = axes5.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out',c='r', s=8)
+                plt.xlabel('a')
+                plt.ylabel('b')
+                axes4.legend((part1, part2, part3, part4), ('input', 'index', 'colored', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
