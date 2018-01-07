@@ -190,18 +190,19 @@ def get_lab_channel(image, image_size, type):
         l_channel = tf.image.decode_jpeg(image, channels = 3)
     if type == "bmp":
         l_channel = tf.image.decode_bmp(image, channels = 3)
-
-    l_channel = tf.image.resize_images(l_channel, [image_size, image_size])
+    height = image_size[0]
+    width = image_size[1]
+    l_channel = tf.image.resize_images(l_channel, [height, width])
     l_channel = tf.cast(l_channel, tf.float64) / 255.0
     l_channel = input_data.rgb_to_lab(l_channel)
     l_channel = tf.cast(l_channel, tf.float32)
     ab_channel = l_channel[:, :, 1:]
     #ab_channel = (l_channel[:, :, 1:] + 128) / 255.0
     l_channel = l_channel[:, :, 0] / 100.0
-    l_channel = tf.reshape(l_channel, [image_size, image_size, 1])
-    ab_channel = tf.reshape(ab_channel, [1, image_size, image_size, 2])
-    l_channel = tf.reshape(l_channel, [1, image_size, image_size, 1])
-    #lab_channel = tf.reshape(lab_channel, [1, image_size, image_size, 3])
+    l_channel = tf.reshape(l_channel, [height, width, 1])
+    ab_channel = tf.reshape(ab_channel, [1, height, width, 2])
+    l_channel = tf.reshape(l_channel, [1, height, width, 1])
+    #lab_channel = tf.reshape(lab_channel, [1, height, width, 3])
     return l_channel, ab_channel
 
 
@@ -241,9 +242,11 @@ def get_theme_channels(theme_img, type):
     if type == "bmp":
         theme_img = tf.image.decode_bmp(theme_img, channels = 3)
     theme_img = tf.image.resize_images(theme_img, [1, 5])
-    theme_img = tf.cast(theme_img, tf.float32) / 255.0
-    theme_img = tf.reshape(theme_img, [1, 1, 5, 3])
-    theme_ab = theme_img[:, :, :, 1:]
+    theme_img = tf.cast(theme_img, tf.float64) / 255.0
+    theme_img = input_data.rgb_to_lab(theme_img)
+    theme_img = tf.cast(theme_img, tf.float32)
+    theme_ab = (theme_img[:, :, 1:] + 128) / 255
+    theme_ab = tf.reshape(theme_ab, [1, 1, 5, 2])
     return theme_ab
 
 def get_theme_mask(theme_mask, type):
@@ -259,22 +262,36 @@ def get_theme_mask(theme_mask, type):
     theme_mask = tf.ones([1, 1, 5, 1], dtype=tf.float32)
     return theme_mask
 
-def test_theme_image():
-    # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/27.jpg"
-    theme_Dir = "test/test_theme/1 (4).bmp"
-    output_Dir = "output/1812/27-1 (4).jpg"
-    mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log1812/model.ckpt-82500"
+def get_imageSize(image, sess, type):
+    if type == "jpg":
+        image = tf.image.decode_jpeg(image, channels=3)
+    if type == "bmp":
+        image = tf.image.decode_bmp(image, channels=3)
+    img = sess.run(image)
+    image_size = img.shape[0:2]
+    height = image_size[0] // 8 * 8
+    width = image_size[1] // 8 * 8
+    return [height, width]
 
-    # get mask image
-    image_size = 224
+
+
+def test_theme_image():
+    # 15,18,20,21,27
+    test_Dir = "test/test_images/27.jpg"
+    theme_Dir = "test/test_theme/myTheme1.bmp"
+    output_Dir = "output/1817/new/27-my1.jpg"
+    mask_Dir = "test/test_mask/theme_mask.bmp"
+    checkpoint_Dir = "logs/log1817/model.ckpt-97500"
+
+    sess = tf.Session()
 
     test_img = tf.read_file(test_Dir)
+    image_size = get_imageSize(test_img, sess, "jpg")
     l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
 
     theme_img = tf.read_file(theme_Dir, "bmp")
     theme = get_theme_channels(theme_img, "bmp")
+    #theme = tf.zeros([1, 1, 5, 2], dtype=tf.float32)
 
     mask_img = tf.read_file(mask_Dir)
     mask = get_theme_mask(mask_img, "bmp")
@@ -283,13 +300,13 @@ def test_theme_image():
 
     theme_input = tf.concat([theme, mask], 3)
 
-    ab_out = model.built_network(ab_channel, theme_input)
+    ab_out = model.new_built_network(ab_channel, theme_input)
 
     # load ckpt file, load the model
     logs_dir = 'F:/Deep Learning/Code/colorization/logs/log1228'
     saver = tf.train.Saver()
 
-    sess = tf.Session()
+
     print('载入检查点...')
 
     ckpt = tf.train.get_checkpoint_state(logs_dir)
@@ -314,7 +331,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()
