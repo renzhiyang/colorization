@@ -25,7 +25,7 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     #theme_mask_dir = "G:\\Database\\ColorThemeMask5"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log_global"
+    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log_global\\image loss 0.2"
     result_dir = "results/global/"
 
     # 获取输入
