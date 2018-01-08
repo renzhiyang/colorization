@@ -55,8 +55,8 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
-        #if len(filename_list) > 50000:
-        #    break
+        #if len(filename_list) > 10000:
+        #   break
     return filename_list
 
 
@@ -413,8 +413,8 @@ def get_wholeObj_batch(file_list, batch_size, capacity):
     sparse_mask = tf.read_file(filename_queue[4])
     sparse_mask = tf.image.decode_bmp(sparse_mask, channels=3)
     sparse_mask = tf.image.resize_images(sparse_mask, [image_size, image_size])
-    sparse_mask = f.cast(sparse_mask, tf.float32) / 255
-    sparse_mask2channels = sparse_mask[:, :, :, 0:2]
+    sparse_mask = tf.cast(sparse_mask, tf.float32) / 255
+    sparse_mask2channels = sparse_mask[:, :, 0:2]
 
 
     train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch = \
