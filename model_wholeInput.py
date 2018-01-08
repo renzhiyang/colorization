@@ -75,6 +75,55 @@ def decode(input_batch, layer1, layer2, layer3):
         conv8_1 = general_conv2d(conv7_3, 2, 1, 1, name="conv8_1")
         return tf.nn.tanh(conv8_1, name="output")
 
+def newEncode(input_batch):
+    with tf.name_scope("newEncode") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1_1 = general_conv2d(input_batch, filters, kernel_size, 2, name = "newEn_conv11")
+        conv1_2 = general_conv2d(conv1_1, filters * 2, kernel_size, 1, name = "newEn_conv12")
+        conv2_1 = general_conv2d(conv1_2, filters * 2, kernel_size, 2, name = "newEn_conv21")
+        conv2_2 = general_conv2d(conv2_1, filters * 4, kernel_size, 1, name = "newEn_conv22")
+        conv3_1 = general_conv2d(conv2_2, filters * 4, kernel_size, 2, name = "newEn_conv31")
+        conv3_2 = general_conv2d(conv3_1, filters * 8, kernel_size, 1, name = "newEn_conv32")
+        return [conv1_1, conv2_1], conv3_2
+
+def newMiddle_layer(input_batch):
+    with tf.name_scope("newMiddle_layer") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "newMid_conv1")
+        #conv2 = general_conv2d(conv1, filters * 8, kernel_size, 1, name = "newMid_conv2")
+        #conv3 = general_conv2d(conv2, filters * 8, kernel_size, 1, name = "newMid_conv3")
+        #conv4 = general_conv2d(conv3, filters * 8, kernel_size, 1, name="newMid_conv4")
+        #conv5 = general_conv2d(conv4, filters * 8, kernel_size, 1, name="newMid_conv5")
+        #conv6 = general_conv2d(conv5, filters * 8, kernel_size, 1, name="newMid_conv6")
+        #conv7 = general_conv2d(conv6, filters * 8, kernel_size, 1, name="newMid_conv7")
+        #conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
+        conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
+        #conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
+        #conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
+        #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
+        #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
+        conv8 = general_conv2d(conv2, filters * 4, kernel_size, 1, name = "newMid_conv8")
+        return conv8
+
+def newDecode(input_batch, uNetLayer):
+    with tf.name_scope("newEncode2") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1 = general_conv2d(input_batch, filters * 2, kernel_size, 1, name = "newDeco2_conv1")
+        coef1 = tf.get_variable("coef1", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        uplayer1 = upsample_layer(conv1, 2, scope_name="newDeco2_uplayer1") + (1 - coef1) * uNetLayer[1]
+        conv2_1 = general_conv2d(uplayer1, filters, kernel_size, 1, name = "newDeco2_conv21")
+        conv2_2 = general_conv2d(conv2_1, filters, kernel_size, 1, name = "newDeco2_conv22")
+        coef2 = tf.get_variable("coef2", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        uplayer2 = upsample_layer(conv2_2, 2, scope_name="newDeco2_uplayer2") + (1 - coef2) * uNetLayer[0]
+        conv3_1 = general_conv2d(uplayer2, filters / 2, kernel_size, 1, name = "newDeco2_conv31")
+        conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, do_relu=False, name = "newDeco2_conv32")
+        conv3_2 = tf.nn.tanh(conv3_2, "addSigmoid")
+        uplayer3 = upsample_layer(conv3_2, 2, scope_name = "newDeco2_uplayer3")
+        return uplayer3
+
 def theme_features_network(theme_batch, num_outputs):
     with tf.name_scope("theme_features_network") as scope:
         batch_size = theme_batch.get_shape()[0].value
@@ -111,15 +160,17 @@ def fusion_layer(source_feature, target_feature):
 
 def built_network(input_ab_batch, theme_input, sparse_input):
     with tf.name_scope("network") as scope:
-        kernel_size = 3
-        filters = 64
-        # input_batch = 224*224*3
-        input_batch = tf.concat([input_ab_batch, sparse_input], 3)
-        layer1, layer2, layer3 = encode(input_batch)
-        middle_output = middle_layer(layer3)
+        input_ab_batch = general_conv2d(input_ab_batch, 64, 3, 1, name = "pre_conv_input")
+        sparse_input = general_conv2d(sparse_input, 64, 3, 1, name = "pre_conv_sparse")
+        coef = tf.get_variable("coef", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        input_batch = input_ab_batch + (1 - coef) * sparse_input
+
+        # input_batch = 224*224*64
+        unetLayer, encodeResult = newEncode(input_batch)
+        middle_output = newMiddle_layer(encodeResult)
         theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         fusion_out = fusion_layer(middle_output, theme_output)
-        out_ab_batch = decode(fusion_out, layer1, layer2, layer3)
+        out_ab_batch = newDecode(fusion_out, unetLayer)
         return out_ab_batch
 
 
@@ -168,28 +219,31 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
 
 
 #loss function
-def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch, image_exceptPoints, out_exceptPoints):
+def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch, mask2channels):
     with tf.name_scope('loss') as scope:
+        image_exceptPoints = image_ab_batch - image_ab_batch * mask2channels
+        out_exceptPoints = output_ab_batch - output_ab_batch * mask2channels
+        local_output_ab = output_ab_batch * mask2channels
+        local_colored_ab = themeIndex_ab_batch * mask2channels
+
         #global loss
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5) #index loss
-        image_loss = tf.losses.huber_loss(output_ab_batch, image_ab_batch, delta = 0.5) #image loss
+        image_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #image loss
         color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5) #color theme loss
         global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
 
-        #local loss
+        #local loss, do gradient between output and index
         sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
-        exceptPoints_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #except points loss
+        localpoint_loss = L1_loss(local_output_ab, local_colored_ab, name = "localPoint_loss")
+        local_loss = sobel_loss + localpoint_loss * 1e4
 
         whole_loss = global_loss + local_loss
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("global_loss", global_loss)
         tf.summary.scalar("local_loss", local_loss)
+        tf.summary.scalar("localPoint_loss", localpoint_loss)
         tf.summary.scalar("sobel_loss", sobel_loss)
-        tf.summary.scalar("exceptPoints_loss", exceptPoints_loss)
-        tf.summary.scalar("index_loss", index_loss)
-        tf.summary.scalar("image_loss", image_loss)
-        tf.summary.scalar("color_loss", color_loss)
-        return whole_loss, global_loss, local_loss, index_loss, image_loss, color_loss, sobel_loss, exceptPoints_loss
+        return whole_loss, global_loss, local_loss, sobel_loss, localpoint_loss * 1e4
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
