@@ -284,10 +284,10 @@ def get_imageSize(image, sess, type):
 def test_theme_image():
     # 15,18,20,21,27
     test_Dir = "test/test_images/27.jpg"
-    theme_Dir = "test/test_theme/myTheme1.bmp"
-    output_Dir = "output/1817/new/27-my1.jpg"
+    theme_Dir = "test/test_theme/theme_513.bmp"
+    output_Dir = "output/global/image_loss2/27-5131.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log1817/model.ckpt-97500"
+    checkpoint_Dir = "logs/log_global/image_loss2/model.ckpt-60000"
 
     sess = tf.Session()
 
@@ -337,7 +337,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()
