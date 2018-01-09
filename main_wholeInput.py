@@ -204,18 +204,19 @@ def get_lab_channel(image, image_size, type):
         l_channel = tf.image.decode_jpeg(image, channels = 3)
     if type == "bmp":
         l_channel = tf.image.decode_bmp(image, channels = 3)
-
-    l_channel = tf.image.resize_images(l_channel, [image_size, image_size])
+    height = image_size[0]
+    width = image_size[1]
+    l_channel = tf.image.resize_images(l_channel, [height, width])
     l_channel = tf.cast(l_channel, tf.float64) / 255.0
     l_channel = input_data.rgb_to_lab(l_channel)
     l_channel = tf.cast(l_channel, tf.float32)
     ab_channel = l_channel[:, :, 1:]
     #ab_channel = (l_channel[:, :, 1:] + 128) / 255.0
     l_channel = l_channel[:, :, 0] / 100.0
-    l_channel = tf.reshape(l_channel, [image_size, image_size, 1])
-    ab_channel = tf.reshape(ab_channel, [1, image_size, image_size, 2])
-    l_channel = tf.reshape(l_channel, [1, image_size, image_size, 1])
-    #lab_channel = tf.reshape(lab_channel, [1, image_size, image_size, 3])
+    l_channel = tf.reshape(l_channel, [height, width, 1])
+    ab_channel = tf.reshape(ab_channel, [1, height, width, 2])
+    l_channel = tf.reshape(l_channel, [1, height, width, 1])
+    #lab_channel = tf.reshape(lab_channel, [1, height, width, 3])
     return l_channel, ab_channel
 
 
@@ -260,7 +261,7 @@ def get_theme_channels(theme_img, type):
     theme_ab = theme_img[:, :, :, 1:]
     return theme_ab
 
-def get_theme_mask(theme_mask, type):
+def get_theme_mask(theme_num, type):
     '''if type == "jpg":
         theme_mask = tf.image.decode_jpeg(theme_mask, channels = 3)
     if type == "bmp":
@@ -270,40 +271,73 @@ def get_theme_mask(theme_mask, type):
     theme_mask = tf.reshape(theme_mask, [1, 1, 7, 3])
     theme_mask = tf.reshape(theme_mask[:, :, :, 0], [1, 1, 7, 1])'''
 
-    theme_mask = tf.ones([1, 1, 5, 1], dtype=tf.float32)
+    theme_mask = tf.ones([1, 1, theme_num, 1], dtype=tf.float32)
     return theme_mask
+
+def get_sparse_mask(sparse_mask, image_size, type):
+    if type == "jpg":
+        sparse_mask = tf.image.decode_jpeg(sparse_mask, channels = 3)
+    if type == "bmp":
+        sparse_mask = tf.image.decode_bmp(sparse_mask, channels = 3)
+    sparse_mask = tf.image.resize_images(sparse_mask, [image_size[0], image_size[1]])
+    sparse_mask = tf.cast(sparse_mask, tf.float32) / 255
+    sparse_mask = tf.reshape(sparse_mask, [1, image_size[0], image_size[1], 3])
+    sparse_mask = sparse_mask[:, :, :, 0:1]
+    return sparse_mask
+
+
+def get_imageSize(image, sess, type):
+    if type == "jpg":
+        image = tf.image.decode_jpeg(image, channels=3)
+    if type == "bmp":
+        image = tf.image.decode_bmp(image, channels=3)
+    img = sess.run(image)
+    image_size = img.shape[0:2]
+    height = image_size[0] // 8 * 8
+    width = image_size[1] // 8 * 8
+    return [height, width]
+
 
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/27.jpg"
-    theme_Dir = "test/test_theme/1 (4).bmp"
-    output_Dir = "output/1812/27-1 (4).jpg"
+    test_Dir = "test/test_images/20.jpg"
+    theme_Dir = "test/test_theme/theme_556.bmp"
+    sparse_Dir = "test/test_sparse/local_20_6.bmp"
+    sparse_mask_Dir = "test/test_mask/mask_20_6.bmp"
+    output_Dir = "output/global&local/20-556-20.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log1812/model.ckpt-82500"
+    checkpoint_Dir = "logs/log_gloabal&local/gradient_index/model.ckpt-52500"
 
-    # get mask image
-    image_size = 224
+    sess = tf.Session()
 
     test_img = tf.read_file(test_Dir)
+    image_size = get_imageSize(test_img, sess, "jpg")
     l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
+
+    sparse_img = tf.read_file(sparse_Dir)
+    sparse_l, sparse_ab = get_lab_channel(sparse_img, image_size, "bmp")
+
+    sparse_mask = tf.read_file(sparse_mask_Dir)
+    sparse_mask = get_sparse_mask(sparse_mask, image_size, "bmp")
 
     theme_img = tf.read_file(theme_Dir, "bmp")
     theme = get_theme_channels(theme_img, "bmp")
 
-    mask_img = tf.read_file(mask_Dir)
-    mask = get_theme_mask(mask_img, "bmp")
+    mask = get_theme_mask(5, "bmp")
 
     ab_channel = (ab_channel + 128) / 255
 
     theme_input = tf.concat([theme, mask], 3)
+    sparse_input = tf.concat([sparse_ab, sparse_mask], 3)
 
-    ab_out = model.built_network(ab_channel, theme_input)
+    print(ab_channel, theme_input, sparse_input)
+    ab_out = model.built_network(ab_channel, theme_input, sparse_input)
 
     # load ckpt file, load the model
-    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log1228'
+    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_gloabal&local/gradient_index/'
     saver = tf.train.Saver()
 
-    sess = tf.Session()
+
     print('载入检查点...')
 
     ckpt = tf.train.get_checkpoint_state(logs_dir)
@@ -328,7 +362,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()
