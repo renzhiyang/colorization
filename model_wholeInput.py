@@ -226,6 +226,7 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
         local_output_ab = output_ab_batch * mask2channels
         local_colored_ab = themeIndex_ab_batch * mask2channels
 
+
         #global loss
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5) #index loss
         image_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #image loss
