@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
 
-    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_image"
-    result_dir = "results/global&local/gradient_image/"
+    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index"
+    result_dir = "results/global&local/gradient_index/"
 
     # 获取输入
     image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir)
@@ -54,7 +54,7 @@ def run_training():
     image_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
     theme_ab_batch = (theme_lab_batch[:, :, :, 1:] + 128) / 255
     index_ab_batch = (index_ab_batch + 128) / 255
-    sparse_ab_batch = (sparse_ab_batch[:, :, :, 1:] + 128) / 255
+    sparse_ab_batch = (sparse_ab_batch + 128) / 255
     themeIndex_ab_batch = (themeIndex_lab_batch[:, :, :, 1:] + 128) / 255
 
     #input batches
