@@ -234,7 +234,7 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
         global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
 
         #local loss, do gradient between output and index
-        sobel_loss = sobeled_losses(output_ab_batch, image_ab_batch)
+        sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
         localpoint_loss = L1_loss(local_output_ab, local_colored_ab, name = "localPoint_loss")
         local_loss = sobel_loss + localpoint_loss * 1e4
 
