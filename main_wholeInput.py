@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
 
-    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_images"
-    result_dir = "results/global&local/gradient_images"
+    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_image"
+    result_dir = "results/global&local/gradient_image/"
 
     # 获取输入
     image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir)
