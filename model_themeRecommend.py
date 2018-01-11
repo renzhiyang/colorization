@@ -77,9 +77,6 @@ def built_network(input_batch):
         print(FC_3)
     return FC_3
 
-input_batch = tf.ones([50, 224, 224, 1], dtype=tf.float32)
-built_network(input_batch)
-
 
 
 # Loss函数
