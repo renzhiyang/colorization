@@ -426,4 +426,45 @@ def get_wholeObj_batch(file_list, batch_size, capacity):
 
     return train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch
 
+def get_themeRecommend_list(train_dir, index_dir):
+    train_list = get_all_files(train_dir)
+    index_list = get_all_files(index_dir)
 
+    print("训练目录%s, 文件个数%d" % (train_dir, len(train_list)))
+    print("训练目录%s, 文件个数%d" % (index_dir, len(index_list)))
+
+    temp = np.array([train_list, index_list])
+    temp = temp.transpose()
+    np.random.shuffle(temp)
+    train_list = list(temp[:, 0])
+    index_list = list(temp[:, 1])
+
+    return [train_list, index_list]
+
+def get_themeRecommend_batch(file_list, batch_size, capacity):
+    image_size = 224
+
+    # produce queue
+    filename_queue = tf.train.slice_input_producer(file_list, shuffle=False)
+
+    #train image list
+    train_image = tf.read_file(filename_queue[0])
+    train_image = tf.image.decode_jpeg(train_image, channels=3)
+    train_image = color.rgb2gray(train_image)
+    train_image = tf.image.resize_images(train_image, [image_size, image_size])
+    train_image = tf.cast(train_image, tf.float32) / 255
+
+    #index list
+    index_image = tf.read_file(filename_queue[1])
+    index_image = tf.image.decode_bmp(index_image, channels=3)
+    index_image = color.rgb2gray(index_image)
+    index_image = tf.image.resize_images(index_image, [1, 7])
+    index_image = tf.cast(index_image, tf.float32) / 255
+
+    train_batch, index_batch = \
+        tf.train.shuffle_batch([train_image, index_image],
+                               batch_size=batch_size,
+                               capacity=capacity,
+                               min_after_dequeue=500,
+                               num_threads=64)
+    return train_batch, index_batch
