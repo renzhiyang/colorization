@@ -229,14 +229,15 @@ def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_ba
 
         #global loss
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5) #index loss
-        image_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #image loss
+        #image_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #image loss
         color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5) #color theme loss
-        global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
+        #global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
+        global_loss = 0.3 * index_loss + 0.7 * color_loss
 
         #local loss, do gradient between output and index
         sobel_loss = sobeled_losses(output_ab_batch, image_ab_batch)
         localpoint_loss = L1_loss(local_output_ab, local_colored_ab, name = "localPoint_loss")
-        local_loss = sobel_loss + localpoint_loss * 1e4
+        local_loss = 0.1 * sobel_loss + 0.9 * localpoint_loss * 1e4
 
         whole_loss = global_loss + local_loss
         tf.summary.scalar("whole_loss", whole_loss)

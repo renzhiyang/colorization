@@ -25,7 +25,7 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
 
-    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index"
+    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index2"
     result_dir = "results/global&local/gradient_index/"
 
     # 获取输入
@@ -378,7 +378,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-#run_training()
+run_training()
 #test_one_image()
-test_theme_image()
+#test_theme_image()
 # test_batch_image()
