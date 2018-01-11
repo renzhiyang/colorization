@@ -30,14 +30,14 @@ def run_training():
     #train batch[BATCH_SIZE, 224, 224, 3], index batch[BATCH_SIZE, 1, 7, 3]
     train_batch, index_rgb_batch = input_data.get_themeRecommend_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    index_batch = tf.reshape(index_batch, [BATCH_SIZE, 1, -1])
+    index_batch = tf.reshape(index_rgb_batch, [BATCH_SIZE, 1, -1])
     #out_batch [BATCH_SIZE, 1, 21]
     out_batch = model.new_built_network(train_batch)
-    out_rgb_batch = tf.reshape(out_batch, [BATCH_SIZE, -1, 3])
+    out_rgb_batch = tf.reshape(out_batch, [BATCH_SIZE, 1, 7, 3])
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = model.whole_loss(out_ab_batch, index_batch)
+    train_loss = model.whole_loss(out_batch, index_batch)
     train_op = model.training(train_loss, global_step)
 
     summary_op = tf.summary.merge_all()
