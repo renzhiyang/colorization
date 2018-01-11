@@ -39,6 +39,25 @@ def batch_norm_layer(x, training = tf.constant(True)):
         normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
     return normed
 
+def max_pool(input_op, kh, kw, dh, dw, name):
+    with tf.variable_scope(name):
+        return  tf.nn.max_pool(input_op,
+                               ksize = [1, kh, kw, 1],
+                               strides = [1, dh, dw, 1],
+                               padding = 'SAME',
+                               name = name)
+
+
+def full_connect(input_op, n_out, name):
+    with tf.variable_scope(name):
+        n_in = input_op.get_shape()[-1].value
+        kernel = tf.get_variable(scope+'w',
+                                shape = [n_in, n_out],
+                                dtype = tf.float32,
+                                initializer = tf.contrib.layers.xavier_initializer())
+        biases = tf.Variable(tf.constant(0.1, shape = [n_out], dtype = tf.float32), name = 'b')
+        activation = tf.nn.relu_layer(input_op, kernel, biases, name = scope)
+        return activation
 
 #instance normalize
 def instance_norm(x):
