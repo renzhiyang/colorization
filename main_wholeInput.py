@@ -256,9 +256,11 @@ def get_theme_channels(theme_img, type):
     if type == "bmp":
         theme_img = tf.image.decode_bmp(theme_img, channels = 3)
     theme_img = tf.image.resize_images(theme_img, [1, 5])
-    theme_img = tf.cast(theme_img, tf.float32) / 255.0
-    theme_img = tf.reshape(theme_img, [1, 1, 5, 3])
-    theme_ab = theme_img[:, :, :, 1:]
+    theme_img = tf.cast(theme_img, tf.float64) / 255.0
+    theme_img = input_data.rgb_to_lab(theme_img)
+    theme_img = tf.cast(theme_img, tf.float32)
+    theme_ab = (theme_img[:, :, 1:] + 128) / 255
+    theme_ab = tf.reshape(theme_ab, [1, 1, 5, 2])
     return theme_ab
 
 def get_theme_mask(theme_num, type):
@@ -302,11 +304,11 @@ def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/20.jpg"
     theme_Dir = "test/test_theme/theme_556.bmp"
-    sparse_Dir = "test/test_sparse/local_20_6.bmp"
-    sparse_mask_Dir = "test/test_mask/mask_20_6.bmp"
-    output_Dir = "output/global&local/20-556-20.jpg"
+    sparse_Dir = "test/test_images2/local_20_2.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
+    output_Dir = "output/global&local/20-556-2.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log_gloabal&local/gradient_index/model.ckpt-52500"
+    checkpoint_Dir = "logs/log_gloabal&local/gradient_image/model.ckpt-52500"
 
     sess = tf.Session()
 
@@ -326,9 +328,10 @@ def test_theme_image():
     mask = get_theme_mask(5, "bmp")
 
     ab_channel = (ab_channel + 128) / 255
+    sparse_ab = (sparse_ab + 128) / 255
 
     theme_input = tf.concat([theme, mask], 3)
-    sparse_input = tf.concat([sparse_ab, sparse_mask], 3)
+    sparse_input = tf.concat([sparse_ab, sparse_mask[:, :, :, 0:1]], 3)
 
     print(ab_channel, theme_input, sparse_input)
     ab_out = model.built_network(ab_channel, theme_input, sparse_input)
@@ -351,6 +354,19 @@ def test_theme_image():
 
     l_channel = tf.cast(l_channel, tf.float64)
     ab_out = tf.cast(ab_out, tf.float64)
+
+    sparse_l = tf.cast(sparse_l, tf.float64)
+    sparse_ab = tf.cast(sparse_ab, tf.float64)
+    sparse_l, sparse_ab = sess.run([sparse_l, sparse_ab])
+    sparse_l = sparse_l[0]
+    sparse_ab = sparse_ab[0]
+    sparse_l = sparse_l * 100
+    sparse_ab = sparse_ab * 255 - 128
+    sparse = np.concatenate([sparse_l, sparse_ab], 2)
+    sparse = color.lab2rgb(sparse)
+    plt.imshow(sparse, 'gray')
+    plt.show()
+
 
     l, ab = sess.run([l_channel, ab_out])
     l = l[0]
