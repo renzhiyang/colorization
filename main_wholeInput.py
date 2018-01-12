@@ -25,8 +25,8 @@ def run_training():
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
 
-    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index2"
-    result_dir = "results/global&local/gradient_index/"
+    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index3"
+    result_dir = "results/global&local/gradient_index3/"
 
     # 获取输入
     image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir)
@@ -46,6 +46,9 @@ def run_training():
     #do + - * / before normalization
     index_ab_batch = index_lab_batch[:, :, :, 1:]
     sparse_ab_batch = sparse_mask2channels_batch * index_ab_batch
+
+    sparse_l_batch = sparse_mask2channels_batch[:, :, :, 0:1] * index_lab_batch[:, :, :, 0:1]
+    sparse_l_batch = tf.cast(sparse_l_batch, tf.float64)
 
 
     #normalization
@@ -105,6 +108,16 @@ def run_training():
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
+            if step % 100 == 0:
+                sparse_l, sparse_ab, mask2 = sess.run([sparse_l_batch, sparse_ab_batch, sparse_mask2channels_batch])
+                sparse_l = sparse_l[0] * 100
+                sparse_ab = sparse_ab[0] * 255 - 128
+                sparse = np.concatenate([sparse_l, sparse_ab], 2)
+                sparse = color.lab2rgb(sparse)
+                print(np.max(mask2))
+                print(np.min(mask2))
+                plt.show()
+
 
             if step % 2000 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
