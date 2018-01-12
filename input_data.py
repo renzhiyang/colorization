@@ -55,7 +55,7 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
-        if len(filename_list) > 50000:
+        if len(filename_list) > 1000:
            break
     return filename_list
 
