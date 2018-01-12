@@ -24,13 +24,15 @@ def run_training():
     image_index_dir = "G:\\Database\\ColoredData\\new_colorimage4"
     theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
     sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
+    sparse_dir = "G:\\Database\\ColoredData\\newSparse"
 
     logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index3"
     result_dir = "results/global&local/gradient_index3/"
 
     # 获取输入
-    image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir)
-    train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch = input_data.get_wholeObj_batch(image_list, BATCH_SIZE, CAPACITY)
+    image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir, sparse_dir)
+    train_batch, theme_batch, theme_index_batch, theme_mask_batch, image_index_batch, sparse_mask2channels_batch, sparse_batch\
+        = input_data.get_wholeObj_batch(image_list, BATCH_SIZE, CAPACITY)
 
     #rgb_to_lab
 
@@ -38,18 +40,14 @@ def run_training():
     image_index_batch = tf.cast(image_index_batch, tf.float64)
     theme_batch = tf.cast(theme_batch, tf.float64)
     theme_index_batch = tf.cast(theme_index_batch, tf.float64)
+    sparse_batch = tf.cast(sparse_batch, tf.float64)
     train_lab_batch = tf.cast(input_data.rgb_to_lab(train_batch), tf.float32)
     theme_lab_batch = tf.cast(input_data.rgb_to_lab(theme_batch), tf.float32)
     index_lab_batch = tf.cast(input_data.rgb_to_lab(image_index_batch), tf.float32)
     themeIndex_lab_batch = tf.cast(input_data.rgb_to_lab(theme_index_batch), tf.float32)
+    sparse_lab_batch = tf.cast(input_data.rgb_to_lab(sparse_batch), tf.float32)
 
     #do + - * / before normalization
-    index_ab_batch = index_lab_batch[:, :, :, 1:]
-    sparse_ab_batch = sparse_mask2channels_batch * index_ab_batch
-
-    sparse_l_batch = sparse_mask2channels_batch[:, :, :, 0:1] * index_lab_batch[:, :, :, 0:1]
-    sparse_l_batch = tf.cast(sparse_l_batch, tf.float64)
-
 
     #normalization
     image_l_batch = tf.reshape(train_lab_batch[:, :, :, 0] / 100, [BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, 1])
@@ -57,7 +55,9 @@ def run_training():
     image_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
     theme_ab_batch = (theme_lab_batch[:, :, :, 1:] + 128) / 255
     index_ab_batch = (index_ab_batch + 128) / 255
-    sparse_ab_batch = (sparse_ab_batch + 128) / 255
+    sparse_l_batch = sparse_lab_batch[:, :, :, 0:1] / 255
+    sparse_l_batch = tf.cast(sparse_l_batch, tf.float64)
+    sparse_ab_batch = (sparse_lab_batch[:, :, :, 1:] + 128) / 255
     themeIndex_ab_batch = (themeIndex_lab_batch[:, :, :, 1:] + 128) / 255
 
     #input batches
@@ -109,13 +109,12 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
             if step % 100 == 0:
-                sparse_l, sparse_ab, mask2 = sess.run([sparse_l_batch, sparse_ab_batch, sparse_mask2channels_batch])
+                sparse_l, sparse_ab, mask2 = sess.run([sparse_l_batch, sparse_ab_batch])
                 sparse_l = sparse_l[0] * 100
                 sparse_ab = sparse_ab[0] * 255 - 128
                 sparse = np.concatenate([sparse_l, sparse_ab], 2)
                 sparse = color.lab2rgb(sparse)
-                print(np.max(mask2))
-                print(np.min(mask2))
+                plt.imshow(sparse)
                 plt.show()
 
 
