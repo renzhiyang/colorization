@@ -219,23 +219,23 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
 
 
 #loss function
-def whole_loss(output_ab_batch, index_ab_batch, themeIndex_ab_batch, image_ab_batch, mask2channels):
+def whole_loss(output_ab_batch, index_ab_batch, colored_ab_batch, image_ab_batch, mask2channels):
     with tf.name_scope('loss') as scope:
         image_exceptPoints = image_ab_batch - image_ab_batch * mask2channels
         out_exceptPoints = output_ab_batch - output_ab_batch * mask2channels
         local_output_ab = output_ab_batch * mask2channels
-        local_colored_ab = themeIndex_ab_batch * mask2channels
+        local_colored_ab = colored_ab_batch * mask2channels
 
 
         #global loss
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch, delta = 0.5) #index loss
         #image_loss = tf.losses.huber_loss(out_exceptPoints, image_exceptPoints, delta = 0.5) #image loss
-        color_loss = tf.losses.huber_loss(output_ab_batch, themeIndex_ab_batch, delta = 0.5) #color theme loss
+        color_loss = tf.losses.huber_loss(output_ab_batch, colored_ab_batch, delta = 0.5) #color theme loss
         #global_loss = 0.1 * image_loss + 0.9 * (0.3 * index_loss + 0.7 * color_loss)
         global_loss = 0.3 * index_loss + 0.7 * color_loss
 
         #local loss, do gradient between output and index
-        sobel_loss = sobeled_losses(output_ab_batch, image_ab_batch)
+        sobel_loss = sobeled_losses(output_ab_batch, colored_ab_batch)
         localpoint_loss = L1_loss(local_output_ab, local_colored_ab, name = "localPoint_loss")
         local_loss = 0.1 * sobel_loss + 0.9 * localpoint_loss * 1e4
 
