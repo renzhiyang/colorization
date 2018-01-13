@@ -55,8 +55,8 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
-        if len(filename_list) > 1000:
-           break
+        #if len(filename_list) > 1000:
+        #   break
     return filename_list
 
 
@@ -422,7 +422,7 @@ def get_wholeObj_batch(file_list, batch_size, capacity):
     #sparse list
     sparse = tf.read_file(filename_queue[5])
     sparse = tf.image.decode_bmp(sparse, channels=3)
-    sparse = tf.resize_images(sparse, [image_size, image_size])
+    sparse = tf.image.resize_images(sparse, [image_size, image_size])
     sparse = tf.cast(sparse, tf.float32) / 255
 
 
