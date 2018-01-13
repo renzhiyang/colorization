@@ -392,7 +392,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-#run_training()
+run_training()
 #test_one_image()
-test_theme_image()
+#test_theme_image()
 # test_batch_image()
