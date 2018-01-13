@@ -317,11 +317,11 @@ def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/20.jpg"
     theme_Dir = "test/test_theme/theme_556.bmp"
-    sparse_Dir = "test/test_images2/local_20_2.bmp"
-    sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
-    output_Dir = "output/global&local/20-556-2.jpg"
+    sparse_Dir = "test/test_images2/local_20_3.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_20_3.bmp"
+    output_Dir = "output/global&local3/20-556-3.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log_gloabal&local/gradient_image/model.ckpt-52500"
+    checkpoint_Dir = "logs/log_gloabal&local/gradient_index3/model.ckpt-67500"
 
     sess = tf.Session()
 
@@ -350,7 +350,7 @@ def test_theme_image():
     ab_out = model.built_network(ab_channel, theme_input, sparse_input)
 
     # load ckpt file, load the model
-    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_gloabal&local/gradient_index/'
+    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_gloabal&local/gradient_index3/'
     saver = tf.train.Saver()
 
 
@@ -367,7 +367,7 @@ def test_theme_image():
 
     l_channel = tf.cast(l_channel, tf.float64)
     ab_out = tf.cast(ab_out, tf.float64)
-
+    '''
     sparse_l = tf.cast(sparse_l, tf.float64)
     sparse_ab = tf.cast(sparse_ab, tf.float64)
     sparse_l, sparse_ab = sess.run([sparse_l, sparse_ab])
@@ -379,6 +379,7 @@ def test_theme_image():
     sparse = color.lab2rgb(sparse)
     plt.imshow(sparse, 'gray')
     plt.show()
+    '''
 
 
     l, ab = sess.run([l_channel, ab_out])
@@ -391,7 +392,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()
