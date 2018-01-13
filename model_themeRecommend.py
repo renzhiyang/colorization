@@ -67,15 +67,15 @@ def built_network(input_batch):
         #print(FC_1)
 
         FC_2 = layers.fully_connected(inputs=FC_1,
-                               num_outputs=1000,
+                               num_outputs=4096,
                                scope='FC_2')
         #print(FC_2)
 
-        FC_3 = layers.fully_connected(inputs=FC_2,
+        '''FC_3 = layers.fully_connected(inputs=FC_2,
                                num_outputs=100,
-                               scope='FC_3')
+                               scope='FC_3')'''
 
-        FC_4 = layers.fully_connected(inputs=FC_3,
+        FC_4 = layers.fully_connected(inputs=FC_2,
                                       num_outputs=21,
                                       scope='FC_4')
         #print(FC_3)

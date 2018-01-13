@@ -19,11 +19,11 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
 #theme recommend system
 def run_training():
-    train_dir = "D:\\themeProject\\Database\\test"
-    index_dir = "D:\\themeProject\\Database\\ColorTheme7"
+    train_dir = "F:\\Database\\ColorImages"
+    index_dir = "F:\\Database\\ColorTheme7"
 
-    logs_dir = "D:\\themeProject\\logs\\0112"
-    result_dir = "themeResult/0113/"
+    logs_dir = "E:\\Project_Yang\\Code\\logs\\themeRecommend"
+    result_dir = "themeResult/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)
@@ -107,6 +107,7 @@ def run_training():
                 plt.subplot(1, 3, 2), plt.imshow(index_rgb)
                 plt.subplot(1, 3, 3), plt.imshow(out_rgb)
                 plt.savefig(result_dir + str(step) + "_image.png")
+                plt.show()
 
     except tf.errors.OutOfRangeError:
         print("Done.")
