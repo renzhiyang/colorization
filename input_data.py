@@ -55,8 +55,8 @@ def get_all_files(file_path):
             filename_list.extend(get_all_files(path))
         elif os.path.isfile(path):  # 如果是文件
             filename_list.append(path)
-        #if len(filename_list) > 1000:
-        #   break
+        if len(filename_list) > 2000:
+           break
     return filename_list
 
 
@@ -459,16 +459,14 @@ def get_themeRecommend_batch(file_list, batch_size, capacity):
     #train image list
     train_image = tf.read_file(filename_queue[0])
     train_image = tf.image.decode_jpeg(train_image, channels=3)
-    train_image = color.rgb2gray(train_image)
     train_image = tf.image.resize_images(train_image, [image_size, image_size])
-    train_image = tf.cast(train_image, tf.float32) / 255
+    train_image = tf.cast(train_image, tf.float64) / 255
 
     #index list
     index_image = tf.read_file(filename_queue[1])
     index_image = tf.image.decode_bmp(index_image, channels=3)
-    index_image = color.rgb2gray(index_image)
     index_image = tf.image.resize_images(index_image, [1, 7])
-    index_image = tf.cast(index_image, tf.float32) / 255
+    index_image = tf.cast(index_image, tf.float64) / 255
 
     train_batch, index_batch = \
         tf.train.shuffle_batch([train_image, index_image],
