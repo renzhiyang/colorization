@@ -81,7 +81,7 @@ def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=False, do_r
                                        kernel_size=kernel_size,
                                        stride=strides,
                                        activation_fn = None,
-                                       #weights_initializer = tf.truncated_normal_initializer(stddev=stddev),
+                                       weights_initializer = tf.truncated_normal_initializer(stddev=stddev),
                                        scope=name)
 
         if do_norm:
