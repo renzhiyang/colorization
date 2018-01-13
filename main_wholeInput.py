@@ -19,12 +19,12 @@ IMAGE_SIZE = 224
 
 #global theme input, use 3 resnet, 5 color theme
 def run_training():
-    train_dir = "G:\\Database\\ColoredData\\new_colorimage1"
-    theme_index_dir = "G:\\Database\\ColoredData\\ColorMap5_image4"
-    image_index_dir = "G:\\Database\\ColoredData\\new_colorimage4"
-    theme_dir = "G:\\Database\\ColoredData\\colorImages4_5theme"
-    sparse_mask_dir = "G:\\Database\\ColoredData\\sparse_mask"
-    sparse_dir = "G:\\Database\\ColoredData\\newSparse"
+    train_dir = "F:\\Database\\ColoredData\\new_colorimage1"
+    theme_index_dir = "F:\\Database\\ColoredData\\ColorMap5_image4"
+    image_index_dir = "F:\\Database\\ColoredData\\new_colorimage4"
+    theme_dir = "F:\\Database\\ColoredData\\colorImages4_5theme"
+    sparse_mask_dir = "F:\\Database\\ColoredData\\sparse_mask"
+    sparse_dir = "F:\\Database\\ColoredData\\newSparse"
 
     logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index4"
     result_dir = "results/global&local/gradient_index4/"
