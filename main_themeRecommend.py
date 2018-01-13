@@ -4,42 +4,57 @@ import tensorflow as tf
 import numpy as np
 import os
 import input_data
-import model_globalInput as model
+import model_themeRecommend as model
 from math import isnan
 from matplotlib import pyplot as plt
 import skimage.color as color
 ## import cv2
 
-BATCH_SIZE = 10
+BATCH_SIZE = 20
 CAPACITY = 1000     # 队列容量
-MAX_STEP = 150000
+MAX_STEP = 50000
 IMAGE_SIZE = 224
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
 #theme recommend system
 def run_training():
-    train_dir = "G:\\Database\\ColoredData\\new_colorimage1"
-    index_dir = ""
+    train_dir = "D:\\themeProject\\Database\\test"
+    index_dir = "D:\\themeProject\\Database\\ColorTheme7"
 
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log_global\\image loss 0.2"
-    result_dir = "results/global/"
+    logs_dir = "D:\\themeProject\\logs\\0112"
+    result_dir = "themeResult/0113/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)
     #train batch[BATCH_SIZE, 224, 224, 3], index batch[BATCH_SIZE, 1, 7, 3]
-    train_batch, index_rgb_batch = input_data.get_themeRecommend_batch(image_list, BATCH_SIZE, CAPACITY)
+    train_rgb_batch, index_rgb_batch = input_data.get_themeRecommend_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    index_batch = tf.reshape(index_rgb_batch, [BATCH_SIZE, 1, -1])
+    train_lab_batch = tf.cast(input_data.rgb_to_lab(train_rgb_batch), dtype = tf.float32)
+    index_lab_batch = tf.cast(input_data.rgb_to_lab(index_rgb_batch), dtype=tf.float32)
+
+    #normalize
+    train_l_batch = train_lab_batch[:, :, :, 0:1] / 100
+    train_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
+    index_l_batch = index_lab_batch[:, :, :, 0:1] / 100
+    index_ab_batch = (index_lab_batch[:, :, :, 1:] + 128) / 255
+    train_n_batch = tf.concat([train_l_batch, train_ab_batch], 3)
+    index_n_batch = tf.concat([index_l_batch, index_ab_batch], 3)
+
+    index_n_batch = tf.reshape(index_n_batch, [BATCH_SIZE, 1, -1])
     #out_batch [BATCH_SIZE, 1, 21]
-    out_batch = model.new_built_network(train_batch)
-    out_rgb_batch = tf.reshape(out_batch, [BATCH_SIZE, 1, 7, 3])
+    out_batch = model.built_network(train_l_batch)
+    print(out_batch)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss = model.whole_loss(out_batch, index_batch)
+    train_loss = model.whole_loss(out_batch, index_n_batch)
     train_op = model.training(train_loss, global_step)
 
+    out_lab_batch = tf.cast(tf.reshape(out_batch, [BATCH_SIZE, 1, 7, 3]), tf.float64)
+    index_n_batch = tf.cast(tf.reshape(index_n_batch, [BATCH_SIZE, 1, 7, 3]), tf.float64)
+    train_n_batch = tf.cast(train_n_batch, tf.float64)
+    index_lab_batch = tf.cast(index_lab_batch, tf.float64)
     summary_op = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
     saver = tf.train.Saver(max_to_keep=20)
@@ -52,9 +67,7 @@ def run_training():
         for step in range(MAX_STEP):
             if coord.should_stop():
                 break
-
             _, tra_loss = sess.run([train_op, train_loss])
-
             if isnan(tra_loss):
                 print('Loss is NaN.')
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
@@ -68,13 +81,32 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
-                train_img, index_theme, out_theme = sess.run([train_batch, index_rgb_batch, out_rgb_batch])
-                plt.subplot(1, 3, 1), plt.imshow(train_img)
-                plt.subplot(1, 3, 2), plt.imshow(index_theme)
-                plt.subplot(1, 3, 3), plt.imshow(out_theme)
+            if step % 500 == 0:
+                train_lab, index_lab, out_lab, index = sess.run([train_n_batch, index_n_batch, out_lab_batch, index_lab_batch])
+                train_lab = train_lab[0]
+                index_lab = index_lab[0]
+                out_lab = out_lab[0]
+                index = index[0]
+
+
+                train_lab[:,:,0:1] = train_lab[:,:,0:1] * 100
+                train_lab[:, :, 1:] = train_lab[:,:,1:] * 255 - 128
+                index_lab[:, :, 0:1] = index_lab[:, :, 0:1] * 100
+                index_lab[:, :, 1:] = index_lab[:, :, 1:] * 255 - 128
+                out_lab[:, :, 0:1] = out_lab[:, :, 0:1] * 100
+                out_lab[:, :, 1:] = out_lab[:, :, 1:] * 255 - 128
+                print(out_lab)
+
+
+                train_rgb = color.lab2rgb(train_lab)
+                index_rgb = color.lab2rgb(index_lab)
+                out_rgb = color.lab2rgb(out_lab)
+
+
+                plt.subplot(1, 3, 1), plt.imshow(train_rgb)
+                plt.subplot(1, 3, 2), plt.imshow(index_rgb)
+                plt.subplot(1, 3, 3), plt.imshow(out_rgb)
                 plt.savefig(result_dir + str(step) + "_image.png")
-                plt.show()
 
     except tf.errors.OutOfRangeError:
         print("Done.")
@@ -85,7 +117,7 @@ def run_training():
     coord.join(threads=threads)
     sess.close()
 
-#run_training()
+run_training()
 #test_one_image()
-test_theme_image()
+#test_theme_image()
 # test_batch_image()
