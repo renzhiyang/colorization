@@ -12,7 +12,7 @@ import skimage.color as color
 
 BATCH_SIZE = 20
 CAPACITY = 1000     # 队列容量
-MAX_STEP = 50000
+MAX_STEP = 500
 IMAGE_SIZE = 224
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
@@ -81,7 +81,7 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 500 == 0:
+            if step % 100 == 0:
                 train_lab, index_lab, out_lab, index = sess.run([train_n_batch, index_n_batch, out_lab_batch, index_lab_batch])
                 train_lab = train_lab[0]
                 index_lab = index_lab[0]
