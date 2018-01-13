@@ -90,8 +90,8 @@ def L1_loss(out_batch, index_batch, name):
 #loss function
 def whole_loss(output_batch, index_batch):
     with tf.name_scope('loss') as scope:
-        whole_loss = L1_loss(output_batch, index_batch)
-        tf.summary.scalar(whole_loss, "whole_loss")
+        whole_loss = L1_loss(output_batch, index_batch, name = "whole_loss")
+        tf.summary.scalar("whole_loss", whole_loss)
         return whole_loss
 
 
