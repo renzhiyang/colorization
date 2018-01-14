@@ -26,7 +26,7 @@ def run_training():
     sparse_mask_dir = "F:\\Database\\ColoredData\\sparse_mask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
 
-    logs_dir = "F:\\Project_Yang\\Code\\logs\\global_local\\gradient_index4"
+    logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index4"
     result_dir = "results/global&local/gradient_index4/"
 
     # 获取输入
