@@ -23,7 +23,7 @@ def run_training():
     theme_index_dir = "F:\\Database\\ColoredData\\ColorMap5_image4"
     image_index_dir = "F:\\Database\\ColoredData\\new_colorimage4"
     theme_dir = "F:\\Database\\ColoredData\\colorImages4_5theme"
-    sparse_mask_dir = "F:\\Database\\ColoredData\\sparse_mask"
+    sparse_mask_dir = "F:\\Database\\ColoredData\\newSparseMask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
 
     logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index5"
@@ -110,16 +110,29 @@ def run_training():
                 saver.save(sess, checkpoint_path, global_step=step)
             '''
             if step % 100 == 0:
-                sparse_l, sparse_ab = sess.run([sparse_l_batch, sparse_ab_batch])
+                sparse_l, sparse_ab, sparse_mask = sess.run([sparse_l_batch, sparse_ab_batch, sparse_mask2channels_batch])
                 sparse_l = sparse_l[0] * 100
                 sparse_ab = sparse_ab[0] * 255 - 128
+                sparse_mask = sparse_mask[0] * 255
+
+                sparse_mask = np.concatenate([sparse_mask, sparse_mask[:, :, 0:1]], 2)
                 sparse = np.concatenate([sparse_l, sparse_ab], 2)
+                print(sparse_mask.max())
+                print(sparse_mask.min())
+
+
+
+                plt.imshow(sparse_mask)
+                plt.show()
                 sparse = color.lab2rgb(sparse)
+                print(sparse.max())
+                print(sparse.min())
                 plt.imshow(sparse)
                 plt.show()
             '''
 
-            if step % 2000 == 0:
+
+            if step % 1000 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
