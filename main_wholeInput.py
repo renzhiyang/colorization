@@ -26,8 +26,8 @@ def run_training():
     sparse_mask_dir = "F:\\Database\\ColoredData\\sparse_mask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
 
-    logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index4"
-    result_dir = "results/global&local/gradient_index4/"
+    logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index5"
+    result_dir = "results/global&local/gradient_index5/"
 
     # 获取输入
     image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir, sparse_dir)
@@ -119,7 +119,7 @@ def run_training():
                 plt.show()
             '''
 
-            if step % 500 == 0:
+            if step % 2000 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
@@ -392,7 +392,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-#run_training()
+run_training()
 #test_one_image()
-test_theme_image()
+#test_theme_image()
 # test_batch_image()
