@@ -24,39 +24,39 @@ def built_network(input_batch):
         #block 1 -- outputs 112x112x64
         conv1_1 = general_conv2d(input_batch, filters, 3, 1, name = "conv1_1")
         #conv1_2 = general_conv2d(conv1_1, filters, 3, 1, name = "conv1_2")
-        pool_1 = max_pool(conv1_1, 2, 2, 2, 2, name = "pool_1")
-        #pool_1 = general_conv2d(conv1_1, filters, 3, 2, name = "pool_1")
+        #pool_1 = max_pool(conv1_1, 2, 2, 2, 2, name = "pool_1")
+        pool_1 = general_conv2d(conv1_1, filters, 3, 2, name = "pool_1")
         #print(pool_1)
 
         #block2 -- outputs 56x56x128
         conv2_1 = general_conv2d(pool_1, filters * 2, 3, 1, name = "conv2_1")
         #conv2_2 = general_conv2d(conv2_1, filters * 2, 3, 1, name="conv2_2")
-        pool_2 = max_pool(conv2_1, 2, 2, 2, 2, name = "pool_2")
-        #pool_2 = general_conv2d(conv2_1, filters * 2, 3, 2, name = "pool_2")
+        #pool_2 = max_pool(conv2_1, 2, 2, 2, 2, name = "pool_2")
+        pool_2 = general_conv2d(conv2_1, filters * 2, 3, 2, name = "pool_2")
         #print(pool_2)
 
         #block3 -- outputs 28x28x256
         conv3_1 = general_conv2d(pool_2, filters * 4, 3, 1, name = "conv3_1")
         conv3_2 = general_conv2d(conv3_1, filters * 4, 3, 1, name = "conv3_2")
         #conv3_3 = general_conv2d(conv3_2, filters * 4, 3, 1, name = "conv3_3")
-        pool_3 = max_pool(conv3_2, 2, 2, 2, 2, name = "pool_3")
-        #pool_3 = general_conv2d(conv3_2, filters * 4, 3, 2, name = "pool_3")
+        #pool_3 = max_pool(conv3_2, 2, 2, 2, 2, name = "pool_3")
+        pool_3 = general_conv2d(conv3_2, filters * 4, 3, 2, name = "pool_3")
         #print(pool_3)
 
         #block4 -- outputs 14x14x512
         conv4_1 = general_conv2d(pool_3, filters * 8, 3, 1, name = "conv4_1")
         conv4_2 = general_conv2d(conv4_1, filters * 8, 3, 1, name="conv4_2")
         #conv4_3 = general_conv2d(conv4_2, filters * 8, 3, 1, name="conv4_3")
-        pool_4 = max_pool(conv4_2, 2, 2, 2, 2, name = "pool_4")
-        #pool_4 = general_conv2d(conv4_2, filters * 8, 3, 2, name = "pool_4")
+        #pool_4 = max_pool(conv4_2, 2, 2, 2, 2, name = "pool_4")
+        pool_4 = general_conv2d(conv4_2, filters * 8, 3, 2, name = "pool_4")
         #print(pool_4)
 
         #block5 -- outputs 7x7x512
         conv5_1 = general_conv2d(pool_4, filters * 8, 3, 1, name="conv5_1")
         conv5_2 = general_conv2d(conv5_1, filters * 8, 3, 1, name="conv5_2")
         #conv5_3 = general_conv2d(conv5_2, filters * 8, 3, 1, name="conv5_3")
-        pool_5 = max_pool(conv5_2, 2, 2, 2, 2, name="pool_5")
-        #pool_5 = general_conv2d(conv5_2, filters * 8, 3, 2, name = "pool_5")
+        #pool_5 = max_pool(conv5_2, 2, 2, 2, 2, name="pool_5")
+        pool_5 = general_conv2d(conv5_2, filters * 8, 3, 2, name = "pool_5")
         #print(pool_5)
 
         # flatten
@@ -82,20 +82,20 @@ def built_network(input_batch):
         #print(FC_2)
 
         FC_3 = layers.fully_connected(inputs=FC_2_dropout,
-                                      num_outputs=1000,
+                                      num_outputs=100,
                                       scope='FC_3')
         FC_3_dropout = tf.nn.dropout(FC_3, keep_prob=0.5, name="FC_3_dropout")
 
         FC_4 = layers.fully_connected(inputs=FC_3_dropout,
-                                      num_outputs=100,
-                                      scope='FC_4')
-        FC_4_dropout = tf.nn.dropout(FC_4, keep_prob=0.5, name="FC_4_dropout")
-
-        FC_5 = layers.fully_connected(inputs=FC_4_dropout,
                                       num_outputs=21,
-                                      scope='FC_5')
+                                      scope='FC_4')
+        '''FC_4_dropout = tf.nn.dropout(FC_4, keep_prob=0.5, name="FC_4_dropout")
+
+        FC_5 = layers.fully_connected(inputs=FC_3_dropout,
+                                      num_outputs=21,
+                                      scope='FC_5')'''
         #output = tf.nn.softmax(FC_3, name="output")
-    return FC_5
+    return FC_4
 
 '''def built_network2(input_batch):
     with tf.name_scope("network2") as scope:
