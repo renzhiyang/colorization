@@ -119,7 +119,7 @@ def run_training():
                 plt.show()
             '''
 
-            if step % 2000 == 0:
+            if step % 500 == 0:
                 l, ab, ab_index, ab_out, theme_lab, colored = sess.run(
                     [image_l_batch, image_ab_batch, index_ab_batch, out_ab_batch, theme_lab_batch, themeIndex_ab_batch])
                 l = l[0] * 100
