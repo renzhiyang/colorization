@@ -12,7 +12,7 @@ import skimage.color as color
 
 BATCH_SIZE = 50
 CAPACITY = 1000     # 队列容量
-MAX_STEP = 20000
+MAX_STEP = 15000
 IMAGE_SIZE = 224
 
 #os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
@@ -123,8 +123,8 @@ def run_training2():
     train_dir = "D:\\themeProject\\Database\\test"
     index_dir = "D:\\themeProject\\Database\\ColorTheme7"
 
-    logs_dir = "D:\\themeProject\\logs\\themeRecommend"
-    result_dir = "themeResult/"
+    logs_dir = "D:\\themeProject\\logs\\themeRecommend2"
+    result_dir = "themeResult/themeRecommend2/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)

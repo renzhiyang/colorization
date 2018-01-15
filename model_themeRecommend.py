@@ -69,16 +69,15 @@ def built_network(input_batch):
         FC_1 = layers.fully_connected(inputs=resh1,
                                num_outputs=4096,
                                scope='FC_1')
-        FC_1_relu = tf.nn.relu(FC_1)
-        FC_1_dropout = tf.nn.dropout(FC_1_relu, keep_prob=0.5, name = "FC_1_dropout")
+        FC_1_dropout = tf.nn.dropout(FC_1, keep_prob=0.5, name = "FC_1_dropout")
 
         #print(FC_1)
 
         FC_2 = layers.fully_connected(inputs=FC_1_dropout,
                                num_outputs=4096,
                                scope='FC_2')
-        FC_2_relu = tf.nn.relu(FC_2)
-        FC_2_dropout = tf.nn.dropout(FC_2_relu, keep_prob=0.5, name="FC_2_dropout")
+
+        FC_2_dropout = tf.nn.dropout(FC_2, keep_prob=0.5, name="FC_2_dropout")
 
         #print(FC_2)
 
