@@ -82,10 +82,20 @@ def built_network(input_batch):
         #print(FC_2)
 
         FC_3 = layers.fully_connected(inputs=FC_2_dropout,
-                                      num_outputs=21,
+                                      num_outputs=1000,
                                       scope='FC_3')
-        output = tf.nn.softmax(FC_3, name="output")
-    return output
+        FC_3_dropout = tf.nn.dropout(FC_3, keep_prob=0.5, name="FC_3_dropout")
+
+        FC_4 = layers.fully_connected(inputs=FC_3_dropout,
+                                      num_outputs=100,
+                                      scope='FC_4')
+        FC_4_dropout = tf.nn.dropout(FC_4, keep_prob=0.5, name="FC_4_dropout")
+
+        FC_5 = layers.fully_connected(inputs=FC_4_dropout,
+                                      num_outputs=21,
+                                      scope='FC_5')
+        #output = tf.nn.softmax(FC_3, name="output")
+    return FC_5
 
 '''def built_network2(input_batch):
     with tf.name_scope("network2") as scope:

@@ -123,8 +123,8 @@ def run_training2():
     train_dir = "D:\\themeProject\\Database\\test"
     index_dir = "D:\\themeProject\\Database\\ColorTheme7"
 
-    logs_dir = "D:\\themeProject\\logs\\themeRecommend2"
-    result_dir = "themeResult/themeRecommend2/"
+    logs_dir = "D:\\themeProject\\logs\\themeRecommend7"
+    result_dir = "themeResult/themeRecommend7/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)
@@ -172,20 +172,22 @@ def run_training2():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 1000 == 0:
+            if step % 500 == 0:
                 train_g, train_rgb, index_rgb, out_rgb = sess.run([train_g_batch, train_rgb_batch, index_rgb_batch, out_rgb_batch])
                 train_rgb = train_rgb[0]
                 index_rgb = index_rgb[0]
                 out_rgb = out_rgb[0]
                 train_g = train_g[0]
 
-                print(out_rgb)
-                print(index_rgb)
+                print(out_rgb * 255)
+                print(index_rgb * 255)
 
                 plt.subplot(1, 4, 1), plt.imshow(train_rgb)
                 #plt.subplot(1, 4, 2), plt.imshow(train_g)
                 plt.subplot(1, 4, 2), plt.imshow(out_rgb)
                 plt.subplot(1, 4, 3), plt.imshow(index_rgb)
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
                 plt.savefig(result_dir + str(step) + "_image.png")
                 #plt.show()
 
