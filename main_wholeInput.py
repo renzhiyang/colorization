@@ -315,13 +315,13 @@ def get_imageSize(image, sess, type):
 
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/20.jpg"
-    theme_Dir = "test/test_theme/theme_556.bmp"
-    sparse_Dir = "test/test_images2/local_20_3.bmp"
-    sparse_mask_Dir = "test/test_images2/mask_20_3.bmp"
-    output_Dir = "output/global&local3/20-556-3.jpg"
+    test_Dir = "test/test_images/15.jpg"
+    theme_Dir = "test/test_images2/theme_556.bmp"
+    sparse_Dir = "test/test_images2/local_15_1.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_15_1.bmp"
+    output_Dir = "output/global&local4/15-556-2.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log_gloabal&local/gradient_index3/model.ckpt-67500"
+    checkpoint_Dir = "logs/log_gloabal&local/gradient_index4/model.ckpt-67500"
 
     sess = tf.Session()
 
@@ -350,7 +350,7 @@ def test_theme_image():
     ab_out = model.built_network(ab_channel, theme_input, sparse_input)
 
     # load ckpt file, load the model
-    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_gloabal&local/gradient_index3/'
+    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_gloabal&local/gradient_index4/'
     saver = tf.train.Saver()
 
 
@@ -392,7 +392,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()
