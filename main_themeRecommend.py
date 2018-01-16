@@ -12,18 +12,18 @@ import skimage.color as color
 
 BATCH_SIZE = 50
 CAPACITY = 1000     # 队列容量
-MAX_STEP = 40000
+MAX_STEP = 15000
 IMAGE_SIZE = 224
 
 #os.environ["CUDA_VISIBLE_DEVICES"] = "0"        # 指定GPU
 
 #theme recommend system
 def run_training():
-    train_dir = "D:\\themeProject\\Database\\ColorImages"
+    train_dir = "D:\\themeProject\\Database\\test"
     index_dir = "D:\\themeProject\\Database\\ColorTheme7"
 
-    logs_dir = "D:\\themeProject\\logs\\themeRecommend"
-    result_dir = "themeResult/"
+    logs_dir = "D:\\themeProject\\logs\\themeRecommend10"
+    result_dir = "themeResult/themeRecommend10/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)
@@ -106,6 +106,8 @@ def run_training():
                 plt.subplot(1, 3, 1), plt.imshow(train_rgb)
                 plt.subplot(1, 3, 2), plt.imshow(index_rgb)
                 plt.subplot(1, 3, 3), plt.imshow(out_rgb)
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
                 plt.savefig(result_dir + str(step) + "_image.png")
                 #plt.show()
 
@@ -172,7 +174,7 @@ def run_training2():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 1000 == 0:
+            if step % 500 == 0:
                 train_g, train_rgb, index_rgb, out_rgb = sess.run([train_g_batch, train_rgb_batch, index_rgb_batch, out_rgb_batch])
                 train_rgb = train_rgb[0]
                 index_rgb = index_rgb[0]
@@ -200,7 +202,7 @@ def run_training2():
     coord.join(threads=threads)
     sess.close()
 
-run_training2()
+run_training()
 #test_one_image()
 #test_theme_image()
 # test_batch_image()
