@@ -26,8 +26,8 @@ def run_training():
     sparse_mask_dir = "F:\\Database\\ColoredData\\newSparseMask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
 
-    logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index5"
-    result_dir = "results/global&local/gradient_index5/"
+    logs_dir = "E:\\Project_Yang\\Code\\logs\\global_local\\gradient_index6"
+    result_dir = "results/global&local/gradient_index6/"
 
     # 获取输入
     image_list = input_data.get_wholeInput_list(train_dir, theme_dir, theme_index_dir, image_index_dir, sparse_mask_dir, sparse_dir)
@@ -328,13 +328,13 @@ def get_imageSize(image, sess, type):
 
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/15.jpg"
+    test_Dir = "test/test_images/20.jpg"
     theme_Dir = "test/test_images2/theme_556.bmp"
-    sparse_Dir = "test/test_images2/local_15_1.bmp"
-    sparse_mask_Dir = "test/test_images2/mask_15_1.bmp"
-    output_Dir = "output/global&local4/15-556-2.jpg"
+    sparse_Dir = "test/test_images2/local_20_2.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
+    output_Dir = "output/global&local4/20-556-2.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
-    checkpoint_Dir = "logs/log_gloabal&local/gradient_index4/model.ckpt-67500"
+    checkpoint_Dir = "logs/log_gloabal&local/gradient_index4/model.ckpt-22500"
 
     sess = tf.Session()
 
@@ -402,10 +402,12 @@ def test_theme_image():
     ab = ab * 255 - 128
     img_out = np.concatenate([l, ab], 2)
     img_out = color.lab2rgb(img_out)
+    #if not os.path.exists(output_Dir):
+    #    os.makedirs(output_Dir)
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 #test_one_image()
-#test_theme_image()
+test_theme_image()
 # test_batch_image()

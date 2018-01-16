@@ -239,7 +239,7 @@ def whole_loss(output_ab_batch, index_ab_batch, colored_ab_batch, image_ab_batch
         localpoint_loss = L1_loss(local_output_ab, local_index_ab, name = "localPoint_loss")
         local_loss = sobel_loss + localpoint_loss * 1e4
 
-        whole_loss = global_loss + local_loss
+        whole_loss = 0.4 * global_loss + 0.6 * local_loss
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("global_loss", global_loss)
         tf.summary.scalar("local_loss", local_loss)
