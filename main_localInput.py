@@ -86,7 +86,7 @@ def run_training():
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
-            if step % 2000 == 0:
+            if step % 1000 == 0:
                 l, ab, ab_index, ab_out = sess.run(
                     [train_l_batch, train_ab_batch, index_ab_batch, out_ab_batch])
                 l = l[0]
@@ -151,7 +151,7 @@ def run_training():
                 part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
-                axes4.legend((part1, part2, part3), ('input', 'output', 'index'))
+                axes4.legend((part1, part3, part2), ('input', 'index', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
