@@ -123,8 +123,8 @@ def run_training2():
     train_dir = "D:\\themeProject\\Database\\test"
     index_dir = "D:\\themeProject\\Database\\ColorTheme7"
 
-    logs_dir = "D:\\themeProject\\logs\\themeRecommend6"
-    result_dir = "themeResult/themeRecommend6/"
+    logs_dir = "D:\\themeProject\\logs\\themeRecommend9"
+    result_dir = "themeResult/themeRecommend9/"
 
     # 获取输入
     image_list = input_data.get_themeRecommend_list(train_dir, index_dir)

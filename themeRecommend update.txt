@@ -16,7 +16,9 @@ themeRecommend4         22333          4096,4096,21             No
 themeRecommend5         22222          4096,4096,21 		No
 themeRecommend6		11222	       4096,4096,100,21		it's ok
 themeRecommend7		11222	       4096,4096,1000,100,21,   it's ok
-themeRecommend8         11222          4096,4096,100,21(pool replace by conv)  
+themeRecommend8         11222          4096,4096,100,21(pool replace by conv)   No
+themeRecommend9         11222          4096,4096,1000,21,remove conv weight initialzer        
+
 
 
 
