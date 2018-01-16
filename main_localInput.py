@@ -26,38 +26,34 @@ def run_training():
     result_dir = "results/1221/"
 
     # 获取输入
-    image_list = input_data.get_image_list2(train_dir, mask_dir, index_dir)
-    l_batch, ab_batch, index_ab_batch, mask_batch, mask_batch_2channels = input_data.get_batch2(image_list, BATCH_SIZE, CAPACITY)
+    image_list = input_data.get_local_list(train_dir, sparse_dir, mask_dir, index_dir)
+    train_rgb_batch, sparse_rgb_batch, mask_2channels_batch, index_rgb_batch\
+        = input_data.get_local_batch(image_list, BATCH_SIZE, CAPACITY)
 
-    sparse_ab_batch = index_ab_batch * mask_batch_2channels
-    #replace images
-    replace_image = (ab_batch - ab_batch * mask_batch_2channels) + sparse_ab_batch
+    train_lab_batch = tf.cast(input_data.rgb_to_lab(train_rgb_batch), tf.float32)
+    sparse_lab_batch = tf.cast(input_data.rgb_to_lab(sparse_rgb_batch), tf.float32)
+    index_lab_batch = tf.cast(input_data.rgb_to_lab(index_rgb_batch), tf.float32)
 
     #do '+ - * /' before normalization
-    l_batch = l_batch / 100
-    ab_batch = (ab_batch + 128) / 255
-    index_ab_batch = (index_ab_batch + 128) / 255
-    sparse_ab_batch = (sparse_ab_batch + 128) / 255
-    replace_image = (replace_image + 128) / 255
-
-    #concat images
-    input_batch = tf.concat([ab_batch, sparse_ab_batch], 3)
-    mask_batch = mask_batch_2channels[:, :, :, 0]
-    mask_batch = tf.reshape(mask_batch, [BATCH_SIZE, 224, 224, 1])
-
-    #gray image input
-    #ray_input = tf.concat([l_batch, sparse_ab_batch], 3)
+    train_l_batch = train_lab_batch[:, :, :, 0:1] / 100
+    train_ab_batch = (train_lab_batch[:, :, :, 1:] + 128) / 255
+    sparse_l_batch = sparse_lab_batch[:, :, :, 0:1] / 100
+    sparse_ab_batch = (sparse_lab_batch[:, :, :, 1:] + 128) / 255
+    index_l_batch = index_lab_batch[:, :, :, 0:1] / 100
+    index_ab_batch = (index_lab_batch[:, :, :, 1:] + 128) / 255
+    sparse_input = tf.concat([sparse_ab_batch, mask_2channels_batch[:, :, :, 0:1]], 3)
 
     #concat image_ab and sparse_ab as input
-    out_ab_batch = model.built_network1212(input_batch, mask_batch)
+    out_ab_batch = model.built_network(train_ab_batch, sparse_input)
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss, index_loss, sobel_loss, local_points_loss = model.whole_loss(out_ab_batch, index_ab_batch, mask_batch_2channels)
+    train_loss, sobel_loss, local_points_loss = model.whole_loss(out_ab_batch, index_ab_batch, train_ab_batch, mask_batch_2channels)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
-    l_batch = tf.cast(l_batch, tf.float64)
+    train_l_batch = tf.cast(train_l_batch, tf.float64)
+    index_l_batch = tf.cast(index_l_batch, tf.float64)
     #lab_batch = tf.cast(lab_batch, tf.float64)
 
     summary_op = tf.summary.merge_all()
@@ -73,7 +69,7 @@ def run_training():
             if coord.should_stop():
                 break
 
-            _, tra_loss, indexloss, sobel, local_points = sess.run([train_op, train_loss, index_loss, sobel_loss, local_points_loss])
+            _, tra_loss, sobel, local_points = sess.run([train_op, train_loss, sobel_loss, local_points_loss])
             tra_rmse, tra_psnr = sess.run([train_rmse, train_psnr])
 
             if isnan(tra_loss):
@@ -84,14 +80,14 @@ def run_training():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,    loss: %g,   index: %g,   sobel: %g,  local_points: %g   RMSE: %g,     PSNR: %g" % (step, tra_loss, indexloss, sobel, local_points, tra_rmse, tra_psnr))
+                print("Step: %d,    loss: %g,   sobel: %g,  local_points: %g   RMSE: %g,   PSNR: %g" % (step, tra_loss, sobel, local_points, tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
 
             if step % 2000 == 0:
                 l, ab, ab_index, ab_out = sess.run(
-                    [l_batch, ab_batch, index_ab_batch, out_ab_batch])
+                    [train_l_batch, train_ab_batch, index_ab_batch, out_ab_batch])
                 l = l[0]
                 ab = ab[0]
                 ab_index = ab_index[0]
