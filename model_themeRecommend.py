@@ -82,7 +82,7 @@ def built_network(input_batch):
         #print(FC_2)
 
         FC_3 = layers.fully_connected(inputs=FC_2_dropout,
-                                      num_outputs=1000,
+                                      num_outputs=100,
                                       scope='FC_3')
         FC_3_dropout = tf.nn.dropout(FC_3, keep_prob=0.5, name="FC_3_dropout")
 
