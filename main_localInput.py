@@ -18,12 +18,12 @@ MAX_STEP = 150000
 
 #local input
 def run_training():
-    train_dir = "F:\\Project_Yang\\Database\\database_new\\training_image"
-    index_dir = "F:\\Project_Yang\\Database\\database_new\\index_image"
+    train_dir = "F:\\Database\\ColoredData\\new_colorimage1"
+    index_dir = "F:\\Database\\ColoredData\\new_colorimage4"
     mask_dir = "F:\\Database\\ColoredData\\newSparseMask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
-    logs_dir = "F:\\Project_Yang\\Code\\mainProject\\logs\\log1221"
-    result_dir = "results/1221/"
+    logs_dir = "E:\\Project_Yang\\Code\\logs\\local\\local1"
+    result_dir = "results/local/local1/"
 
     # 获取输入
     image_list = input_data.get_local_list(train_dir, sparse_dir, mask_dir, index_dir)
@@ -33,6 +33,7 @@ def run_training():
     train_lab_batch = tf.cast(input_data.rgb_to_lab(train_rgb_batch), tf.float32)
     sparse_lab_batch = tf.cast(input_data.rgb_to_lab(sparse_rgb_batch), tf.float32)
     index_lab_batch = tf.cast(input_data.rgb_to_lab(index_rgb_batch), tf.float32)
+    mask_2channels_batch = tf.cast(mask_2channels_batch, tf.float32)
 
     #do '+ - * /' before normalization
     train_l_batch = train_lab_batch[:, :, :, 0:1] / 100
@@ -48,7 +49,7 @@ def run_training():
     sess = tf.Session()
 
     global_step = tf.train.get_or_create_global_step(sess.graph)
-    train_loss, sobel_loss, local_points_loss = model.whole_loss(out_ab_batch, index_ab_batch, train_ab_batch, mask_batch_2channels)
+    train_loss, sobel_loss, local_points_loss = model.whole_loss(out_ab_batch, index_ab_batch, train_ab_batch, mask_2channels_batch)
     train_rmse, train_psnr = model.get_PSNR(out_ab_batch, index_ab_batch)
     train_op = model.training(train_loss, global_step)
 
