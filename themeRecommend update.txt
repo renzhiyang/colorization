@@ -1,0 +1,33 @@
+        	     下采样            全连接              结果
+1      		 11222+卷积替换pool   4096,4096,21           No
+
+2      		       11222          4096,4096,21           No
+
+3     		        22333          4096,4096,21           No
+
+4    		   22333+卷积替换pool   4096,4096,21           No
+		
+5     		         ——          4096,4096,21+relu      No
+
+themeRecommend1         11222          4096,4096,21+relu+soft   No
+themeRecommend2         11222          4096,4096,21+soft        No
+themeRecommend3         11222          4096,4096,21              little well
+themeRecommend4         22333          4096,4096,21             No
+themeRecommend5         22222          4096,4096,21 		No
+themeRecommend6		11222	       4096,4096,100,21		it's ok
+themeRecommend7		11222	       4096,4096,1000,100,21,   it's ok
+themeRecommend8         11222          4096,4096,100,21(pool replace by conv)  
+
+
+
+
+summary：
+1、最后一层不需要softmax
+2、全连接层除最后一层每层加dropout效果好
+3、11222的模型更好
+4、全连接4096之后需要一个过度层
+
+
+TODO：
+1、maxpool层替换成卷积，在11222+4096,4094,100,21的基础上
+2、卷积参数的初始化
