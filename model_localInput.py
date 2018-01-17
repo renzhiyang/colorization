@@ -43,11 +43,11 @@ def newMiddle_layer(input_batch):
         #conv7 = general_conv2d(conv6, filters * 8, kernel_size, 1, name="newMid_conv7")
         #conv1 = build_ResnetBlock(input_batch, filters * 8, name="newMid_conv1")
         conv2 = build_ResnetBlock(conv1, filters * 8, name="newMid_conv2")
-        #conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
-        #conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
+        conv3 = build_ResnetBlock(conv2, filters * 8, name="newMid_conv3")
+        conv4 = build_ResnetBlock(conv3, filters * 8, name="newMid_conv4")
         #conv5 = build_ResnetBlock(conv4, filters * 8, name="newMid_conv5")
         #conv6 = build_ResnetBlock(conv5, filters * 8, name="newMid_conv6")
-        conv8 = general_conv2d(conv2, filters * 4, kernel_size, 1, name = "newMid_conv8")
+        conv8 = general_conv2d(conv4, filters * 4, kernel_size, 1, name = "newMid_conv8")
         return conv8
 
 def newDecode(input_batch, uNetLayer):
@@ -165,7 +165,7 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
         sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
         localpoint_loss = L1_loss(local_output_ab, local_index_ab, name = "localPoint_loss")
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch)
-        whole_loss = sobel_loss + index_loss + localpoint_loss * 1e4
+        whole_loss = sobel_loss + index_loss
 
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("localPoint_loss", localpoint_loss)
