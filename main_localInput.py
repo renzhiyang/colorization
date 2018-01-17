@@ -151,6 +151,8 @@ def run_training():
                 part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
+                if not os.path.exists(result_dir):
+                    os.makedirs(result_dir)
                 axes4.legend((part1, part3, part2), ('input', 'index', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
