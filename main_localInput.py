@@ -147,13 +147,13 @@ def run_training():
 
                 axes4 = plt.subplot(224)
                 part1 = axes4.scatter(ab[:, :, 0], ab[:, :, 1], alpha=0.5, edgecolor='white', label='image_in', s=8)
-                part2 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c = 'r', s=8)
-                part3 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
+                part2 = axes4.scatter(ab_index[:, :, 0], ab_index[:, :, 1], alpha=0.5, edgecolor='white', label='image_index', c='g', s=8)
+                part3 = axes4.scatter(ab_out[:, :, 0], ab_out[:, :, 1], alpha=0.5, edgecolor='white', label='image_out', c='r', s=8)
                 plt.xlabel('a')
                 plt.ylabel('b')
                 if not os.path.exists(result_dir):
                     os.makedirs(result_dir)
-                axes4.legend((part1, part3, part2), ('input', 'index', 'output'))
+                axes4.legend((part1, part2, part3), ('input', 'index', 'output'))
                 plt.savefig(result_dir + str(step) + "_scatter.png")
                 plt.show()
 
