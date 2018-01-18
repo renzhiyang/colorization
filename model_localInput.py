@@ -63,7 +63,7 @@ def newDecode(input_batch, uNetLayer):
         uplayer2 = upsample_layer(conv2_2, 2, scope_name="newDeco2_uplayer2") + (1 - coef2) * uNetLayer[0]
         conv3_1 = general_conv2d(uplayer2, filters / 2, kernel_size, 1, name = "newDeco2_conv31")
         conv3_2 = general_conv2d(conv3_1, 2, kernel_size, 1, do_relu=False, name = "newDeco2_conv32")
-        conv3_2 = tf.nn.tanh(conv3_2, "addSigmoid")
+        conv3_2 = tf.nn.sigmoid(conv3_2, "addSigmoid")
         uplayer3 = upsample_layer(conv3_2, 2, scope_name = "newDeco2_uplayer3")
         return uplayer3
 
@@ -103,8 +103,8 @@ def fusion_layer(source_feature, target_feature):
 
 def built_network(input_ab_batch, sparse_input):
     with tf.name_scope("built_newwork") as scope:
-        input_ab_batch = general_conv2d(input_ab_batch, 64, 3, 1, name="pre_conv_input")
-        sparse_input = general_conv2d(sparse_input, 64, 3, 1, name="pre_conv_sparse")
+        input_ab_batch = general_conv2d(input_ab_batch, 32, 3, 1, name="pre_conv_input")
+        sparse_input = general_conv2d(sparse_input, 32, 3, 1, name="pre_conv_sparse")
         coef = tf.get_variable("coef", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         input_batch = input_ab_batch + (1 - coef) * sparse_input
 
