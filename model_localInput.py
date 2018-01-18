@@ -101,9 +101,14 @@ def fusion_layer(source_feature, target_feature):
 
         return fusion_feature
 
-def built_network(input_ab_batch, theme_input):
+def built_network(input_ab_batch, sparse_input):
     with tf.name_scope("built_newwork") as scope:
-        unetLayer, encodeResult = newEncode(input_ab_batch)
+        input_ab_batch = general_conv2d(input_ab_batch, 64, 3, 1, name="pre_conv_input")
+        sparse_input = general_conv2d(sparse_input, 64, 3, 1, name="pre_conv_sparse")
+        coef = tf.get_variable("coef", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
+        input_batch = input_ab_batch + (1 - coef) * sparse_input
+
+        unetLayer, encodeResult = newEncode(input_batch)
         middle_output = newMiddle_layer(encodeResult)
         #theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         #fusion_out = fusion_layer(middle_output, theme_output)
