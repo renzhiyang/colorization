@@ -175,18 +175,19 @@ def get_lab_channel(image, image_size, type):
         l_channel = tf.image.decode_jpeg(image, channels = 3)
     if type == "bmp":
         l_channel = tf.image.decode_bmp(image, channels = 3)
-
-    l_channel = tf.image.resize_images(l_channel, [image_size, image_size])
+    height = image_size[0]
+    width = image_size[1]
+    l_channel = tf.image.resize_images(l_channel, [height, width])
     l_channel = tf.cast(l_channel, tf.float64) / 255.0
     l_channel = input_data.rgb_to_lab(l_channel)
     l_channel = tf.cast(l_channel, tf.float32)
     ab_channel = l_channel[:, :, 1:]
     #ab_channel = (l_channel[:, :, 1:] + 128) / 255.0
     l_channel = l_channel[:, :, 0] / 100.0
-    l_channel = tf.reshape(l_channel, [image_size, image_size, 1])
-    ab_channel = tf.reshape(ab_channel, [1, image_size, image_size, 2])
-    l_channel = tf.reshape(l_channel, [1, image_size, image_size, 1])
-    #lab_channel = tf.reshape(lab_channel, [1, image_size, image_size, 3])
+    l_channel = tf.reshape(l_channel, [height, width, 1])
+    ab_channel = tf.reshape(ab_channel, [1, height, width, 2])
+    l_channel = tf.reshape(l_channel, [1, height, width, 1])
+    #lab_channel = tf.reshape(lab_channel, [1, height, width, 3])
     return l_channel, ab_channel
 
 
@@ -220,45 +221,63 @@ def get_mask_channels(mask_img, image_size):
     mask_two_channels = mask_img[:, :, :, 1:]
     return mask_one_channel, mask_two_channels
 
+def get_sparse_mask(sparse_mask, image_size, type):
+    if type == "jpg":
+        sparse_mask = tf.image.decode_jpeg(sparse_mask, channels = 3)
+    if type == "bmp":
+        sparse_mask = tf.image.decode_bmp(sparse_mask, channels = 3)
+    sparse_mask = tf.image.resize_images(sparse_mask, [image_size[0], image_size[1]])
+    sparse_mask = tf.cast(sparse_mask, tf.float32) / 255
+    sparse_mask = tf.reshape(sparse_mask, [1, image_size[0], image_size[1], 3])
+    sparse_mask = sparse_mask[:, :, :, 0:1]
+    return sparse_mask
 
-def test_one_image():
+
+def get_imageSize(image, sess, type):
+    if type == "jpg":
+        image = tf.image.decode_jpeg(image, channels=3)
+    if type == "bmp":
+        image = tf.image.decode_bmp(image, channels=3)
+    img = sess.run(image)
+    image_size = img.shape[0:2]
+    height = image_size[0] // 8 * 8
+    width = image_size[1] // 8 * 8
+    return [height, width]
+
+
+
+def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
-    test_Dir = "test/test_images/iizuka.jpg"
-    sparse_Dir = "test/test_sparses/iizuka.bmp"
-    output_Dir = "output/output1215/iizuka2.jpg"
-    mask_Dir = "test/test_mask/iizuka.bmp"
-    checkpoint_Dir = "logs/log1215/model.ckpt-149999"
+    test_Dir = "test/test_images/20.jpg"
+    sparse_Dir = "test/test_images2/local_20_2.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
+    output_Dir = "output/global&local4/20-556-2.jpg"
+    checkpoint_Dir = "logs/log_local/local2/model.ckpt-75000"
 
-    #get mask image
-    image_size = 224
-    get_mask(sparse_Dir, mask_Dir, image_size)
+    sess = tf.Session()
 
     test_img = tf.read_file(test_Dir)
+    image_size = get_imageSize(test_img, sess, "jpg")
     l_channel, ab_channel = get_lab_channel(test_img, image_size, "jpg")
 
     sparse_img = tf.read_file(sparse_Dir)
-    l_sparse, ab_sparse = get_lab_channel(sparse_img, image_size, "bmp")
+    sparse_l, sparse_ab = get_lab_channel(sparse_img, image_size, "bmp")
 
-    mask_img = tf.read_file(mask_Dir)
-    mask_one_channel, mask_two_channels = get_mask_channels(mask_img, image_size)
+    sparse_mask = tf.read_file(sparse_mask_Dir)
+    sparse_mask = get_sparse_mask(sparse_mask, image_size, "bmp")
 
-    replace_ab_image = (ab_channel - ab_channel * mask_two_channels) + ab_sparse
-    #replace_ab_image = ab_channel - (ab_channel * mask_two_channels)
-    middle_ab_image = ab_channel - (ab_channel * mask_two_channels)
-
-    replace_ab_image = (replace_ab_image + 128) / 255
-    ab_sparse = (ab_sparse + 128) / 255
-    middle_ab_image = (middle_ab_image + 128) / 255
     ab_channel = (ab_channel + 128) / 255
-    input_batch = tf.concat([ab_channel, ab_sparse], 3)
+    sparse_ab = (sparse_ab + 128) / 255
 
-    ab_out = model.built_network1212(input_batch, mask_one_channel)
+    sparse_input = tf.concat([sparse_ab, sparse_mask[:, :, :, 0:1]], 3)
 
-    #load ckpt file, load the model
-    logs_dir = 'F:/Project_Yang/Code/mainProject/logs/log1208'
+    ab_out = model.built_network(ab_channel, sparse_input)
+
+    # load ckpt file, load the model
+    logs_dir = 'F:/Deep Learning/Code/colorization/logs/log_local/local2/'
     saver = tf.train.Saver()
 
-    sess = tf.Session()
+
     print('载入检查点...')
 
     ckpt = tf.train.get_checkpoint_state(logs_dir)
@@ -270,64 +289,36 @@ def test_one_image():
     else:
         print('载入失败')
 
-
     l_channel = tf.cast(l_channel, tf.float64)
-    ab_channel = tf.cast(ab_channel, tf.float64)
     ab_out = tf.cast(ab_out, tf.float64)
-
-    l_inputImage, ab_inputImage,  ab_outImage, ab_replace, ab_spar, ab_middle = sess.run([l_channel, ab_channel, ab_out, replace_ab_image, ab_sparse, middle_ab_image])
-    l_inputImage = l_inputImage[0]
-    ab_inputImage = ab_inputImage[0]
-    ab_outImage = ab_outImage[0]
-    ab_replace = ab_replace[0]
-    ab_spar = ab_spar[0]
-    ab_middle = ab_middle[0]
-
-    print(ab_spar[:, :, 0].min(), ab_spar[:, :, 0].max())
-    print(ab_outImage[:, :, 0].min(), ab_outImage[:, :, 0].max())
-    print(ab_middle[:, :, 0].min(), ab_middle[:, :, 0].max())
-
-    l_inputImage = l_inputImage * 100
-    ab_inputImage = ab_inputImage * 255 - 128
-    ab_outImage = ab_outImage * 255 - 128
-    ab_replace = ab_replace * 255 - 128
-    ab_spar = ab_spar * 255 - 128
-    ab_middle = ab_middle * 255 - 128
-
-    image_in = np.concatenate([l_inputImage, ab_inputImage], 2)
-    image_out = np.concatenate([l_inputImage, ab_outImage], 2)
-    image_replace = np.concatenate([l_inputImage, ab_replace], 2)
-    image_sparse = np.concatenate([l_inputImage, ab_spar], 2)
-    image_in = color.lab2rgb(image_in)
-    image_out = color.lab2rgb(image_out)
-    image_replace = color.lab2rgb(image_replace)
-    image_sparse = color.lab2rgb(image_sparse)
-
-    plt.subplot(4, 4, 1), plt.imshow(l_inputImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 2), plt.imshow(ab_inputImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 3), plt.imshow(ab_inputImage[:, :, 1], 'gray')
-    plt.subplot(4, 4, 4), plt.imshow(image_in, 'gray')
-
-    plt.subplot(4, 4, 5), plt.imshow(l_inputImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 6), plt.imshow(ab_outImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 7), plt.imshow(ab_outImage[:, :, 1], 'gray')
-    plt.subplot(4, 4, 8), plt.imshow(image_out, 'gray')
-
-    plt.subplot(4, 4, 9), plt.imshow(l_inputImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 10), plt.imshow(ab_replace[:, :, 0], 'gray')
-    plt.subplot(4, 4, 11), plt.imshow(ab_replace[:, :, 1], 'gray')
-    plt.subplot(4, 4, 12), plt.imshow(image_replace, 'gray')
-
-    plt.subplot(4, 4, 13), plt.imshow(l_inputImage[:, :, 0], 'gray')
-    plt.subplot(4, 4, 14), plt.imshow(ab_spar[:, :, 0], 'gray')
-    plt.subplot(4, 4, 15), plt.imshow(ab_spar[:, :, 1], 'gray')
-    plt.subplot(4, 4, 16), plt.imshow(image_sparse, 'gray')
+    '''
+    sparse_l = tf.cast(sparse_l, tf.float64)
+    sparse_ab = tf.cast(sparse_ab, tf.float64)
+    sparse_l, sparse_ab = sess.run([sparse_l, sparse_ab])
+    sparse_l = sparse_l[0]
+    sparse_ab = sparse_ab[0]
+    sparse_l = sparse_l * 100
+    sparse_ab = sparse_ab * 255 - 128
+    sparse = np.concatenate([sparse_l, sparse_ab], 2)
+    sparse = color.lab2rgb(sparse)
+    plt.imshow(sparse, 'gray')
     plt.show()
+    '''
 
 
-    plt.imsave(output_Dir, image_out)
+    l, ab = sess.run([l_channel, ab_out])
+    l = l[0]
+    ab = ab[0]
+    l = l * 100
+    ab = ab * 255 - 128
+    img_out = np.concatenate([l, ab], 2)
+    img_out = color.lab2rgb(img_out)
+    #if not os.path.exists(output_Dir):
+    #    os.makedirs(output_Dir)
+    plt.imsave(output_Dir, img_out)
 
 
 run_training()
+test_theme_image()
 #test_one_image()
 # test_batch_image()
