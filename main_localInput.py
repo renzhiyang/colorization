@@ -81,7 +81,7 @@ def run_training():
             if step % 100 == 0:     # 及时记录MSE的变化
                 merged = sess.run(summary_op)
                 train_writer.add_summary(merged, step)
-                print("Step: %d,    loss: %g,   sobel: %g,  local_points: %g   RMSE: %g,   PSNR: %g" % (step, tra_loss, sep_loss[1], sep_loss[2], tra_rmse, tra_psnr))
+                print("Step: %d,    loss: %g,  index_loss: %g,  local_points: %g   RMSE: %g,   PSNR: %g" % (step, tra_loss, sep_loss[0], sep_loss[1], tra_rmse, tra_psnr))
             if step % (MAX_STEP/20) == 0 or step == MAX_STEP-1:     # 保存20个检查点
                 checkpoint_path = os.path.join(logs_dir, "model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
