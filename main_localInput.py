@@ -249,9 +249,9 @@ def get_imageSize(image, sess, type):
 def test_theme_image():
     # sparse_name: blueLine, none, red&blue, red&blue2, redLine
     test_Dir = "test/test_images/20.jpg"
-    sparse_Dir = "test/test_images2/local_20_2.bmp"
-    sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
-    output_Dir = "output/local/local2/20-2.jpg"
+    sparse_Dir = "test/test_images2/local_20_6.bmp"
+    sparse_mask_Dir = "test/test_images2/mask_20_6.bmp"
+    output_Dir = "output/local/local2/20-6.jpg"
     checkpoint_Dir = "logs/log_local/local2/model.ckpt-75000"
 
     sess = tf.Session()
@@ -291,19 +291,28 @@ def test_theme_image():
 
     l_channel = tf.cast(l_channel, tf.float64)
     ab_out = tf.cast(ab_out, tf.float64)
-    '''
+
     sparse_l = tf.cast(sparse_l, tf.float64)
     sparse_ab = tf.cast(sparse_ab, tf.float64)
-    sparse_l, sparse_ab = sess.run([sparse_l, sparse_ab])
+    sparse_l, sparse_ab, out_l, out_ab = sess.run([sparse_l, sparse_ab, l_channel, ab_out])
     sparse_l = sparse_l[0]
     sparse_ab = sparse_ab[0]
+    out_ab = out_ab[0]
+    out_l = out_l[0]
+
     sparse_l = sparse_l * 100
+    out_l = out_l * 100
     sparse_ab = sparse_ab * 255 - 128
+    out_ab = out_ab * 255 - 128
     sparse = np.concatenate([sparse_l, sparse_ab], 2)
+    out = np.concatenate([out_l, out_ab], 2)
+    out = color.lab2rgb(out)
     sparse = color.lab2rgb(sparse)
-    plt.imshow(sparse, 'gray')
+    plt.subplot(1,3,1), plt.imshow(out_ab[:, :, 0], 'gray')
+    plt.subplot(1,3,2), plt.imshow(out_ab[:, :, 1], 'gray')
+    plt.subplot(1,3,3), plt.imshow(out, 'gray')
     plt.show()
-    '''
+
 
 
     l, ab = sess.run([l_channel, ab_out])
