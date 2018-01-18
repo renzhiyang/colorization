@@ -251,7 +251,7 @@ def test_theme_image():
     test_Dir = "test/test_images/20.jpg"
     sparse_Dir = "test/test_images2/local_20_2.bmp"
     sparse_mask_Dir = "test/test_images2/mask_20_2.bmp"
-    output_Dir = "output/global&local4/20-556-2.jpg"
+    output_Dir = "output/local/local2/20-2.jpg"
     checkpoint_Dir = "logs/log_local/local2/model.ckpt-75000"
 
     sess = tf.Session()
@@ -318,7 +318,7 @@ def test_theme_image():
     plt.imsave(output_Dir, img_out)
 
 
-run_training()
+#run_training()
 test_theme_image()
 #test_one_image()
 # test_batch_image()
