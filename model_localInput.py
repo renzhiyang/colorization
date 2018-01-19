@@ -175,7 +175,7 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("localPoint_loss", localpoint_loss)
         tf.summary.scalar("sobel_loss", sobel_loss)
-        return whole_loss, [index_loss, localpoint_loss]
+        return whole_loss, [index_loss]
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
