@@ -181,7 +181,7 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
 
         #local loss, do gradient between output and index
         #sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
-        gra_out_ab = get_sobel_batch(out_ab_batch)
+        gra_out_ab = get_sobel_batch(output_ab_batch)
         gra_index_ab = get_sobel_batch(index_ab_batch)
         sobel_loss = tf.reduce_mean(tf.square(gra_out_ab - gra_index_ab))
 
