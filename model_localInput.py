@@ -157,6 +157,19 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
         mask_loss = L1_loss(outpoint_batch, sparse_batch, name = "mask_L1_loss")
         return mask_loss
 
+def get_sobel_batch(image_batch):
+    assert image_batch.shape[-1].value == 2
+    batch_size = image_batch.shape[0].value
+    height = image_batch.shape[1].value
+    width = image_batch.shape[2].value
+
+    batch1 = image_batch[:, :, :, 0]
+    batch2 = image_batch[:, :, :, 1]
+    batch = tf.reshape(tf.concat([batch1, batch2], 0), [batch_size*2, height, width, 1])
+    batch_sobel = sobel2(batch)
+    batch_sobel = tf.concat([batch_sobel[0], batch_sobel[1]], 0)
+
+    return batch_sobel
 
 #loss function
 def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
@@ -167,15 +180,19 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
         local_index_ab = index_ab_batch * mask2channels
 
         #local loss, do gradient between output and index
-        sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
+        #sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
+        gra_out_ab = get_sobel_batch(out_ab_batch)
+        gra_index_ab = get_sobel_batch(index_ab_batch)
+        sobel_loss = tf.reduce_mean(tf.square(gra_out_ab - gra_index_ab))
+
         localpoint_loss = L1_loss(local_output_ab, local_index_ab, name = "localPoint_loss")
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch)
-        whole_loss = index_loss
+        whole_loss = index_loss + sobel_loss
 
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("localPoint_loss", localpoint_loss)
         tf.summary.scalar("sobel_loss", sobel_loss)
-        return whole_loss, [index_loss]
+        return whole_loss, [index_loss, localpoint_loss, sobel_loss]
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
