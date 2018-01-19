@@ -170,12 +170,12 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
         sobel_loss = sobeled_losses(output_ab_batch, index_ab_batch)
         localpoint_loss = L1_loss(local_output_ab, local_index_ab, name = "localPoint_loss")
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch)
-        whole_loss = index_loss + sobel_loss
+        whole_loss = index_loss
 
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("localPoint_loss", localpoint_loss)
         tf.summary.scalar("sobel_loss", sobel_loss)
-        return whole_loss, [index_loss, localpoint_loss, sobel_loss]
+        return whole_loss, [index_loss, localpoint_loss]
 
 def get_PSNR(out_ab_batch, index_ab_batch):
     #b = 8
