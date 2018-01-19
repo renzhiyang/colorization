@@ -157,6 +157,17 @@ def mask_losses(output_batch, mask_batch_2channels, sparse_batch, name = "mask_l
         mask_loss = L1_loss(outpoint_batch, sparse_batch, name = "mask_L1_loss")
         return mask_loss
 
+def sobel2(image_batch):
+    sobel_x = tf.constant([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], tf.float32)
+    sobel_x_filter = tf.reshape(sobel_x, [3, 3, 1, 1])
+    sobel_y = tf.constant([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], tf.float32)
+    sobel_y_filter = tf.reshape(sobel_y, [3, 3, 1, 1])
+    filtered_x = tf.nn.conv2d(image_batch, sobel_x_filter, strides=[1, 1, 1, 1], padding='SAME')
+    filtered_y = tf.nn.conv2d(image_batch, sobel_y_filter, strides=[1, 1, 1, 1], padding='SAME')
+    # fileterd_xy = tf.sqrt(tf.square(filtered_x) + tf.square(filtered_y))
+    return [filtered_x, filtered_y]
+
+
 def get_sobel_batch(image_batch):
     assert image_batch.shape[-1].value == 2
     batch_size = image_batch.shape[0].value
