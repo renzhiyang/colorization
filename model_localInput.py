@@ -133,7 +133,7 @@ def built_network(input_ab_batch, sparse_input):
         input_batch = input_ab_batch + (1 - coef) * sparse_input
 
         unetLayer, encodeResult = Encode(input_batch)
-        middle_output = Middle_layer(encodeResult)
+        middle_output = newMiddle_layer(encodeResult)
         #theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         #fusion_out = fusion_layer(middle_output, theme_output)
         out_ab_batch = Decode(middle_output, unetLayer)
@@ -222,7 +222,7 @@ def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
 
         localpoint_loss = L1_loss(local_output_ab, local_index_ab, name = "localPoint_loss")
         index_loss = tf.losses.huber_loss(output_ab_batch, index_ab_batch)
-        whole_loss = index_loss + sobel_loss
+        whole_loss = localpoint_loss * 1e4 + sobel_loss
 
         tf.summary.scalar("whole_loss", whole_loss)
         tf.summary.scalar("localPoint_loss", localpoint_loss)
