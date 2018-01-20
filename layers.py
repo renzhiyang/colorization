@@ -95,10 +95,12 @@ def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=False, do_r
                 #conv = tf.nn.tanh(conv, name = "tanh")
         return conv
 
-def general_dilation2d(inputconv, filters,  kernel_size, strides, rates, do_norm=False, do_relu=True, name = "dilation2d"):
+def general_dilation2d(inputconv, filters,  kernel_size, strides, rates, do_norm=False, do_relu=True, name = "dilation2d", relufactor=0):
     with tf.variable_scope(name):
+        filter = tf.Variable(tf.truncated_normal([kernel_size, kernel_size, filters], dtype=tf.float32,
+                                                 stddev=1e-1), name='weights')
         conv = tf.nn.dilation2d(input=inputconv,
-                                filter=[kernel_size, kernel_size, filters],
+                                filter=filter,
                                 strides=[1, strides, strides, 1],
                                 rates=[1, 1, 1, 1],
                                 padding="SAME",
