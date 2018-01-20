@@ -18,8 +18,8 @@ def build_ResnetBlock(inputres, dim, name = "resnet"):
         return tf.nn.relu(out_res + inputres)
 
 
-def newEncode(input_batch):
-    with tf.name_scope("newEncode") as scope:
+def Encode(input_batch):
+    with tf.name_scope("Encode") as scope:
         kernel_size = 3
         filters = 64
         conv1_1 = general_conv2d(input_batch, filters, kernel_size, 2, name = "newEn_conv11")
@@ -28,10 +28,11 @@ def newEncode(input_batch):
         conv2_2 = general_conv2d(conv2_1, filters * 4, kernel_size, 1, name = "newEn_conv22")
         conv3_1 = general_conv2d(conv2_2, filters * 4, kernel_size, 2, name = "newEn_conv31")
         conv3_2 = general_conv2d(conv3_1, filters * 8, kernel_size, 1, name = "newEn_conv32")
+        print(conv3_2)
         return [conv1_1, conv2_1], conv3_2
 
-def newMiddle_layer(input_batch):
-    with tf.name_scope("newMiddle_layer") as scope:
+def Middle_layer(input_batch):
+    with tf.name_scope("Middle_layer") as scope:
         kernel_size = 3
         filters = 64
         conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "newMid_conv1")
@@ -50,8 +51,31 @@ def newMiddle_layer(input_batch):
         conv8 = general_conv2d(conv7, filters * 4, kernel_size, 1, name = "newMid_conv8")
         return conv8
 
-def newDecode(input_batch, uNetLayer):
-    with tf.name_scope("newEncode2") as scope:
+def newMiddle_layer(input_batch):
+    with tf.name_scope("newMiddle_layer") as scope:
+        kernel_size = 3
+        filters = 64
+        conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "conv1")
+        print(conv1)
+        conv2 = general_dilation2d(conv1, filters * 8, kernel_size, 2, 1, name="conv2")
+        print(conv2)
+        conv3 = general_dilation2d(conv2, filters * 8, kernel_size, 1, 2, name = "conv3")
+        print(conv3)
+        conv4 = general_dilation2d(conv3, filters * 8, kernel_size, 1, 2, name = "conv4")
+        print(conv4)
+        conv5 = general_dilation2d(conv4, filters * 8, kernel_size, 1, 2, name = "conv5")
+        print(conv5)
+        conv6 = general_dilation2d(conv5, filters * 8, kernel_size, 1, 2, name = "conv6")
+        print(conv6)
+        conv7 = general_dilation2d(conv6, filters * 8, kernel_size, 1, 2, name = "conv7")
+        print(conv7)
+        conv8 = general_conv2d(conv7, filters * 4, kernel_size, 1, name="conv8")
+        print(conv8)
+        return conv8
+
+
+def Decode(input_batch, uNetLayer):
+    with tf.name_scope("Encode2") as scope:
         kernel_size = 3
         filters = 64
         conv1 = general_conv2d(input_batch, filters * 2, kernel_size, 1, name = "newDeco2_conv1")
@@ -108,11 +132,11 @@ def built_network(input_ab_batch, sparse_input):
         coef = tf.get_variable("coef", shape=[1], dtype=tf.float32, initializer=tf.constant_initializer(0.5))
         input_batch = input_ab_batch + (1 - coef) * sparse_input
 
-        unetLayer, encodeResult = newEncode(input_batch)
-        middle_output = newMiddle_layer(encodeResult)
+        unetLayer, encodeResult = Encode(input_batch)
+        middle_output = Middle_layer(encodeResult)
         #theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         #fusion_out = fusion_layer(middle_output, theme_output)
-        out_ab_batch = newDecode(middle_output, unetLayer)
+        out_ab_batch = Decode(middle_output, unetLayer)
         return out_ab_batch
 
 # Loss函数

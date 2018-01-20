@@ -95,6 +95,25 @@ def general_conv2d(inputconv, filters, kernel_size, strides, do_norm=False, do_r
                 #conv = tf.nn.tanh(conv, name = "tanh")
         return conv
 
+def general_dilation2d(inputconv, filters,  kernel_size, strides, rates, do_norm=False, do_relu=True, name = "dilation2d"):
+    with tf.variable_scope(name):
+        conv = tf.nn.dilation2d(input=inputconv,
+                                filter=[kernel_size, kernel_size, filters],
+                                strides=[1, strides, strides, 1],
+                                rates=[1, 1, 1, 1],
+                                padding="SAME",
+                                name=name)
+
+        if do_norm:
+            conv = instance_norm(conv)
+        if do_relu:
+            if(relufactor == 0):
+                conv = tf.nn.relu(conv,"relu")
+            else:
+                conv = lrelu(conv, relufactor, "lrelu")
+                #conv = tf.nn.tanh(conv, name = "tanh")
+        return conv
+
 
 def general_deconv2d(inputconv, filters, kernel_size, strides, padding = "SAME", name = "conv2d", do_norm=True, do_relu=True, relufactor=0):
     stddev = 0.02
