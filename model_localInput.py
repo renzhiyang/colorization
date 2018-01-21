@@ -57,7 +57,7 @@ def newMiddle_layer(input_batch):
         filters = 64
         conv1 = general_conv2d(input_batch, filters * 8, kernel_size, 1, name = "conv1")
         print(conv1)
-        conv2 = general_dilation2d(conv1, filters * 8, kernel_size, 2, 1, name="conv2")
+        conv2 = general_dilation2d(conv1, filters * 8, kernel_size, 1, 2, name="conv2")
         print(conv2)
         conv3 = general_dilation2d(conv2, filters * 8, kernel_size, 1, 2, name = "conv3")
         print(conv3)
