@@ -133,7 +133,7 @@ def built_network(input_ab_batch, sparse_input):
         input_batch = input_ab_batch + (1 - coef) * sparse_input
 
         unetLayer, encodeResult = Encode(input_batch)
-        middle_output = newMiddle_layer(encodeResult)
+        middle_output = Middle_layer(encodeResult)
         #theme_output = theme_features_network(theme_input, middle_output.shape[-1].value)
         #fusion_out = fusion_layer(middle_output, theme_output)
         out_ab_batch = Decode(middle_output, unetLayer)
