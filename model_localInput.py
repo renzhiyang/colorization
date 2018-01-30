@@ -209,8 +209,6 @@ def get_sobel_batch(image_batch):
 #loss function
 def whole_loss(output_ab_batch, index_ab_batch, image_ab_batch, mask2channels):
     with tf.name_scope('loss') as scope:
-        image_exceptPoints = image_ab_batch - image_ab_batch * mask2channels
-        out_exceptPoints = output_ab_batch - output_ab_batch * mask2channels
         local_output_ab = output_ab_batch * mask2channels
         local_index_ab = index_ab_batch * mask2channels
 
