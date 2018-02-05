@@ -23,7 +23,7 @@ def run_training():
     mask_dir = "F:\\Database\\ColoredData\\newSparseMask"
     sparse_dir = "F:\\Database\\ColoredData\\newSparse"
     logs_dir = "E:\\Project_Yang\\Code\\logs\\local\\local3"
-    result_dir = "results/local/local3/"
+    result_dir = "results/local/local33/"
 
     # 获取输入
     image_list = input_data.get_local_list(train_dir, sparse_dir, mask_dir, index_dir)
