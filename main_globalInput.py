@@ -283,9 +283,9 @@ def get_imageSize(image, sess, type):
 
 def test_theme_image():
     # 15,18,20,21,27
-    test_Dir = "test/test_images/27.jpg"
-    theme_Dir = "test/test_theme/theme_513.bmp"
-    output_Dir = "output/global/image_loss2/27-5131.jpg"
+    test_Dir = "test/test_images2/20.jpg"
+    theme_Dir = "test/test_images2/theme_566.bmp"
+    output_Dir = "output/global/image_loss2/20-566.jpg"
     mask_Dir = "test/test_mask/theme_mask.bmp"
     checkpoint_Dir = "logs/log_global/image_loss2/model.ckpt-60000"
 
