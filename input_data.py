@@ -1,4 +1,5 @@
 # input_data.py  获取数据
+# laotie666
 
 import tensorflow as tf
 import numpy as np
